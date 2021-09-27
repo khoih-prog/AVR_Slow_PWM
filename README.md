@@ -1,22 +1,30 @@
-# AVR_Slow_PWM Library
+## TimerInterrupt Library
 
-[![arduino-library-badge](https://www.ardu-badge.com/badge/AVR_Slow_PWM.svg?)](https://www.ardu-badge.com/AVR_Slow_PWM)
-[![GitHub release](https://img.shields.io/github/release/khoih-prog/AVR_Slow_PWM.svg)](https://github.com/khoih-prog/AVR_Slow_PWM/releases)
-[![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/khoih-prog/AVR_Slow_PWM/blob/main/LICENSE)
+[![arduino-library-badge](https://www.ardu-badge.com/badge/TimerInterrupt.svg?)](https://www.ardu-badge.com/TimerInterrupt)
+[![GitHub release](https://img.shields.io/github/release/khoih-prog/TimerInterrupt.svg)](https://github.com/khoih-prog/TimerInterrupt/releases)
+[![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/khoih-prog/TimerInterrupt/blob/master/LICENSE)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](#Contributing)
-[![GitHub issues](https://img.shields.io/github/issues/khoih-prog/AVR_Slow_PWM.svg)](http://github.com/khoih-prog/AVR_Slow_PWM/issues)
-
----
----
+[![GitHub issues](https://img.shields.io/github/issues/khoih-prog/TimerInterrupt.svg)](http://github.com/khoih-prog/TimerInterrupt/issues)
+[![star this repo](https://githubbadges.com/star.svg?user=khoih-prog&repo=TimerInterrupt)](https://github.com/khoih-prog/TimerInterrupt)
+[![fork this repo](https://githubbadges.com/fork.svg?user=khoih-prog&repo=TimerInterrupt)](https://github.com/khoih-prog/TimerInterrupt/fork)
 
 ## Table of Contents
 
-* [Why do we need this AVR_Slow_PWM library](#why-do-we-need-this-AVR_Slow_PWM-library)
+* [Why do we need this TimerInterrupt library](#why-do-we-need-this-timerinterrupt-library)
   * [Features](#features)
-  * [Why using ISR-based PWM is better](#why-using-isr-based-pwm-is-better)
-  * [Currently supported Boards](#currently-supported-boards)
+  * [Why using ISR-based Hardware Timer Interrupt is better](#why-using-isr-based-hardware-timer-interrupt-is-better)
   * [Important Notes about ISR](#important-notes-about-isr)
-* [Changelog](changelog.md)
+  * [Currently supported Boards](#currently-supported-boards)
+* [Changelog](#changelog)
+  * [Releases v1.5.0](#releases-v150)
+  * [Releases v1.4.1](#releases-v141)
+  * [Releases v1.4.0](#releases-v140)
+  * [Releases v1.3.0](#releases-v130)
+  * [Releases v1.2.0](#releases-v120)
+  * [Releases v1.1.2](#releases-v112)
+  * [Releases v1.1.1](#releases-v111)
+  * [Releases v1.0.3](#releases-v103)
+  * [Releases v1.0.2](#releases-v102)
 * [Prerequisites](#prerequisites)
 * [Installation](#installation)
   * [Use Arduino Library Manager](#use-arduino-library-manager)
@@ -30,19 +38,38 @@
   * [4. Timer3, Timer4, Timer5](#4-timer3-timer4-timer5)
   * [5. Important Notes](#5-important-notes)
 * [Usage](#usage)
-  * [1. Init Hardware Timer](#1-init-hardware-timer)
-  * [2. Set PWM Frequency, dutycycle, attach irqCallbackStartFunc and irqCallbackStopFunc functions](#2-Set-PWM-Frequency-dutycycle-attach-irqCallbackStartFunc-and-irqCallbackStopFunc-functions)
+  * [1. Using only Hardware Timer directly](#1-using-only-hardware-timer-directly)
+    * [1.1 Init Hardware Timer](#11-init-hardware-timer)
+    * [1.2 Set Hardware Timer Interval and attach Timer Interrupt Handler function](#12-set-hardware-timer-interval-and-attach-timer-interrupt-handler-function)
+    * [1.3 Set Hardware Timer Frequency and attach Timer Interrupt Handler function](#13-set-hardware-timer-frequency-and-attach-timer-interrupt-handler-function)
+  * [2. Using 16 ISR_based Timers from 1 Hardware Timer](#2-using-16-isr_based-timers-from-1-hardware-timer)
+    * [2.1 Important Note](#21-important-note)
+    * [2.2 Init Hardware Timer and ISR-based Timer](#22-init-hardware-timer-and-isr-based-timer)
+    * [2.3 Set Hardware Timer Interval and attach Timer Interrupt Handler functions](#23-set-hardware-timer-interval-and-attach-timer-interrupt-handler-functions)
 * [Examples](#examples)
-  * [  1. ISR_8_PWMs_Array](examples/ISR_8_PWMs_Array)
-  * [  2. ISR_8_PWMs_Array_Complex](examples/ISR_8_PWMs_Array_Complex)
-  * [  3. ISR_8_PWMs_Array_Simple](examples/ISR_8_PWMs_Array_Simple)
-* [Example ISR_8_PWMs_Array_Complex](#Example-ISR_8_PWMs_Array_Complex)
+  * [  1. Argument_Complex](examples/Argument_Complex)
+  * [  2. Argument_None](examples/Argument_None)
+  * [  3. Argument_Simple](examples/Argument_Simple)
+  * [  4. **Change_Interval**](examples/Change_Interval). New.
+  * [  5. **FakeAnalogWrite**](examples/FakeAnalogWrite).New.
+  * [  6. **ISR_16_Timers_Array_Complex**](examples/ISR_16_Timers_Array_Complex). New.
+  * [  7. ISR_RPM_Measure](examples/ISR_RPM_Measure)
+  * [  8. ISR_Switch](examples/ISR_Switch)
+  * [  9. ISR_Timer_Complex](examples/ISR_Timer_Complex)
+  * [ 10. **ISR_Timers_Array_Simple**](examples/ISR_Timers_Array_Simple). New.
+  * [ 11. ISR_Timer_Switch](examples/ISR_Timer_Switch)
+  * [ 12. ISR_Timer_Switches](examples/ISR_Timer_Switches)
+  * [ 13. RPM_Measure](examples/RPM_Measure)
+  * [ 14. SwitchDebounce](examples/SwitchDebounce)
+  * [ 15. TimerDuration](examples/TimerDuration)
+  * [ 16. TimerInterruptTest](examples/TimerInterruptTest)
+* [Example ISR_16_Timers_Array_Complex](#example-isr_16_timers_array_complex)
 * [Debug Terminal Output Samples](#debug-terminal-output-samples)
-  * [1. ISR_8_PWMs_Array_Complex on Arduino AVR Leonardo ATMega32U4](#1-ISR_8_PWMs_Array_Complex-on-Arduino-AVR-Leonardo-ATMega32U4)
-  * [2. ISR_8_PWMs_Array on Arduino AVR Mega2560/ADK](#2-ISR_8_PWMs_Array-on-Arduino-AVR-Mega2560ADK)
-  * [3. ISR_8_PWMs_Array_Simple on Arduino AVR Nano](#3-ISR_8_PWMs_Array_Simple-on-Arduino-AVR-Nano)
+  * [1. ISR_16_Timers_Array_Complex on Arduino AVR Nano-V3 board](#1-isr_16_timers_array_complex-on-arduino-avr-nano-v3-board)
+  * [2. Change_Interval on Arduino AVR Mega2560 board](#2-change_interval-on-arduino-avr-mega2560-board)
 * [Debug](#debug)
 * [Troubleshooting](#troubleshooting)
+* [Releases](#releases)
 * [Issues](#issues)
 * [TO DO](#to-do)
 * [DONE](#done)
@@ -54,77 +81,125 @@
 ---
 ---
 
-### Why do we need this [AVR_Slow_PWM library](https://github.com/khoih-prog/AVR_Slow_PWM)
+### Why do we need this [TimerInterrupt library](https://github.com/khoih-prog/TimerInterrupt)
 
 ### Features
 
-This library enables you to use ISR-based PWM channels on AVR-based boards, such as Mega-2560, UNO,Nano, Leonardo, etc., using AVR core to create and output PWM any GPIO pin. Because this library doesn't use the powerful purely hardware-controlled PWM with many limitations, the maximum PWM frequency is currently limited at **500Hz**, which is still suitable for many real-life applications.
+This library enables you to use Interrupt from Hardware Timers on an Arduino or Adafruit AVR board, such as Nano, UNO, Mega, AVR_FEATHER32U4, etc.
 
----
+As **Hardware Timers are rare, and very precious assets** of any board, this library now enables you to use up to **16 ISR-based Timers, while consuming only 1 Hardware Timer**. Timers' interval is very long (**ulong millisecs**).
 
-This library enables you to use Interrupt from Hardware Timers on AVR-based boards to create and output PWM to pins. It now supports 16 ISR-based synchronized PWM channels, while consuming only 1 Hardware Timer. PWM interval can be very long (uint64_t microsecs / millisecs). The most important feature is they're ISR-based PWM channels. Therefore, their executions are not blocked by bad-behaving functions or tasks. This important feature is absolutely necessary for mission-critical tasks. These hardware PWM channels, using interrupt, still work even if other functions are blocking. Moreover, they are much more precise (certainly depending on clock frequency accuracy) than other software PWM using millis() or micros(). That's necessary if you need to measure some data requiring better accuracy.
+Now with these new **16 ISR-based timers**, the maximum interval is **practically unlimited** (limited only by unsigned long miliseconds) while **the accuracy is nearly perfect** compared to software timers. 
 
-As **Hardware Timers are rare, and very precious assets** of any board, this library now enables you to use up to **16 ISR-based synchronized PWM channels, while consuming only 1 Hardware Timer**. Timers' interval is very long (**ulong millisecs**).
+The most important feature is they're ISR-based timers. Therefore, their executions are **not blocked by bad-behaving functions / tasks**. This important feature is absolutely necessary for mission-critical tasks. 
 
-Now with these new **16 ISR-based PWM-channels**, the maximum interval is **practically unlimited** (limited only by unsigned long miliseconds) while **the accuracy is nearly perfect** compared to software PWM channels. 
+The [**ISR_Timer_Complex**](examples/ISR_Timer_Complex) example will demonstrate the nearly perfect accuracy compared to software timers by printing the actual elapsed millisecs of each type of timers.
 
-The most important feature is they're ISR-based PWM channels. Therefore, their executions are **not blocked by bad-behaving functions / tasks**. This important feature is absolutely necessary for mission-critical tasks. 
-
-The [**ISR_8_PWMs_Array_Complex**](examples/ISR_8_PWMs_Array_Complex) example will demonstrate the nearly perfect accuracy, compared to software PWM, by printing the actual period / duty-cycle in `microsecs` of each of PWM-channels.
-
-Being ISR-based PWM, their executions are not blocked by bad-behaving functions / tasks, such as connecting to WiFi, Internet or Blynk services. You can also have many `(up to 16)` PWM channels to use.
+Being ISR-based timers, their executions are not blocked by bad-behaving functions / tasks, such as connecting to WiFi, Internet and Blynk services. You can also have many `(up to 16)` timers to use.
 
 This non-being-blocked important feature is absolutely necessary for mission-critical tasks.
 
-You'll see `software-based` SimpleTimer is blocked while system is connecting to WiFi / Internet / Blynk, as well as by blocking task 
+You'll see blynkTimer Software is blocked while system is connecting to WiFi / Internet / Blynk, as well as by blocking task 
 in loop(), using delay() function as an example. The elapsed time then is very unaccurate
 
----
+### Why using ISR-based Hardware Timer Interrupt is better
 
-#### Why using ISR-based PWM is better
+Imagine you have a system with a **mission-critical function**, measuring water level and control the sump pump or doing something much more important. You normally use a **software timer to poll**, or even place the function in loop(). But what if another function is blocking the loop() or setup().
 
-Imagine you have a system with a **mission-critical** function, measuring water level and control the sump pump or doing something much more important. You normally use a software timer to poll, or even place the function in loop(). But what if another function is **blocking** the loop() or setup().
-
-So your function **might not be executed, and the result would be disastrous.**
+**So your function might not be executed, and the result would be disastrous.**
 
 You'd prefer to have your function called, no matter what happening with other functions (busy loop, bug, etc.).
 
-The correct choice is to use a Hardware Timer with **Interrupt** to call your function.
+The correct choice is to use a **Hardware Timer with Interrupt** to call your function.
 
-These hardware PWM channels, using interrupt, still work even if other functions are blocking. Moreover, they are much more **precise** (certainly depending on clock frequency accuracy) than other software PWM channels using millis() or micros(). That's necessary if you need to measure some data requiring better accuracy.
+**These hardware timers, using interrupt**, still work even if other functions are blocking. Moreover, they are **much more precise** (certainly depending on clock frequency accuracy) than other software timers using millis() or micros(). That's necessary if you need to measure some data requiring better accuracy.
 
-Functions using normal software PWM channels, relying on loop() and calling millis(), won't work if the loop() or setup() is blocked by certain operation. For example, certain function is blocking while it's connecting to WiFi or some services.
+Functions using normal software timers, relying on loop() and calling millis(), won't work if the loop() or setup() is blocked by certain operation. For example, certain function is blocking while it's connecting to WiFi or some services.
 
-The catch is **your function is now part of an ISR (Interrupt Service Routine), and must be lean / mean, and follow certain rules.** More to read on:
+The catch is your function is now part of an ISR (Interrupt Service Routine), and must be lean / mean, and follow certain rules. More to read on:
 
 [**HOWTO Attach Interrupt**](https://www.arduino.cc/reference/en/language/functions/external-interrupts/attachinterrupt/)
 
----
+### Important Notes about ISR
 
-### Currently supported Boards
-
-1. **AVR-based boards** such as **Mega-2560, UNO,Nano, Leonardo**, etc., using AVR core
-
----
-
-#### Important Notes about ISR
-
-1. Inside the attached function, **delay() won’t work and the value returned by millis() will not increment.** Serial data received while in the function may be lost. You should declare as **volatile any variables that you modify within the attached function.**
+1. Inside the attached function, delay() won’t work and the value returned by millis() will not increment. Serial data received while in the function may be lost. You should declare as volatile any variables that you modify within the attached function.
 
 2. Typically global variables are used to pass data between an ISR and the main program. To make sure variables shared between an ISR and the main program are updated correctly, declare them as volatile.
 
+### Currently supported Boards
+
+- Arduino Uno / Mega / Duemilanove / Diecimila / LilyPad / Mini / Fio / Nano, etc.
+- **Arduino ATMega 16U4, 32U4** such as AVR Leonardo, Leonardo ETH, YUN, Esplora, LILYPAD_USB, AVR_ROBOT_CONTROL, AVR_ROBOT_MOTOR, AVR_INDUSTRIAL101, etc.
+- **Adafruit ATMega 32U4** such as AVR_FLORA8, AVR_FEATHER32U4, AVR_CIRCUITPLAY, AVR_ITSYBITSY32U4_5V, AVR_ITSYBITSY32U4_3V, AVR_BLUEFRUITMICRO, AVR_ADAFRUIT32U4, etc.
+- **Adafruit ATMega 328(P)** such as AVR_METRO, AVR_FEATHER328P, AVR_PROTRINKET5, AVR_PROTRINKET3, AVR_PROTRINKET5FTDI, AVR_PROTRINKET3FTDI, etc.
+- **Generic or Sparkfun AVR ATmega_32U4** such as **AVR_MAKEYMAKEY, AVR_PROMICRO, etc.**
+- **Generic or Sparkfun AVR ATmega_328(P)** such as **ARDUINO_REDBOT, ARDUINO_AVR_DIGITAL_SANDBOX, etc.**
+- **Generic or Sparkfun AVR ATmega128RFA1** such as **ATMEGA128RFA1_DEV_BOARD, etc.**
+
 ---
 ---
+
+## Changelog
+
+### Releases v1.5.0
+
+1. Add **Timer3 and Timer4 support to ATmega32U4 and ATmega16U4.** 
+2. Add Timer auto-selection to examples.
+
+### Releases v1.4.1
+
+1. Add support to **Generic or Sparkfun AVR ATmega_32U4** such as **AVR_MAKEYMAKEY, AVR_PROMICRO, etc.**
+2. Add support to **Generic or Sparkfun AVR ATmega_328(P)** such as **ARDUINO_REDBOT, ARDUINO_AVR_DIGITAL_SANDBOX, etc.**
+3. Add support to **Generic or Sparkfun AVR ATmega128RFA1** such as **ATMEGA128RFA1_DEV_BOARD, etc.**
+
+### Releases v1.4.0
+
+1. Add support to **Adafruit AVR ATMEGA_32U4** such as **AVR_FLORA8, AVR_FEATHER32U4, etc.**
+2. Add support to **Adafruit AVR ATMEGA_328(P)** such as **AVR_FEATHER328P, AVR_METRO, etc.**
+3. Update examples
+
+### Releases v1.3.0
+
+1. Add support to **AVR ATMEGA_16U4, ATMEGA_32U4** such as **Leonardo, YUN, ESPLORA, etc.**
+2. Update examples
+
+### Releases v1.2.0
+
+1. Add better debug feature.
+2. Optimize code and examples to reduce RAM usage
+
+
+### Releases v1.1.2
+
+1. Clean-up all compiler warnings possible.
+2. Optimize examples to reduce memory usage by using Flash String whenever possible.
+3. Add Table of Contents
+
+### Releases v1.1.1
+
+1. Add example [**Change_Interval**](examples/Change_Interval)
+2. Bump up version to sync with other TimerInterrupt Libraries. Modify Version String.
+3. Add new h-only code besides conventional h/cpp code
+
+### Releases v1.0.3
+
+1. Add example [**ISR_16_Timers_Array_Complex**](examples/ISR_16_Timers_Array_Complex) and optimize example [**ISR_Timers_Array_Simple**](examples/ISR_Timers_Array_Simple) to demonstrate the usage of **16 ISR-based timers**
+
+### Releases v1.0.2
+
+1. Intial releases.
+
+---
+---
+
 
 ## Prerequisites
 
- 1. [`Arduino IDE 1.8.16+` for Arduino](https://www.arduino.cc/en/Main/Software)
- 2. [`Arduino AVR core 1.8.3+`](https://github.com/arduino/ArduinoCore-avr) for Arduino AVR boards. Use Arduino Board Manager to install. [![Latest release](https://img.shields.io/github/release/arduino/ArduinoCore-avr.svg)](https://github.com/arduino/ArduinoCore-avr/releases/latest/)
- 3. [`Adafruit AVR core 1.4.13+`](https://github.com/adafruit/Adafruit_Arduino_Boards) for Adafruit AVR boards. Use Arduino Board Manager to install. 
- 4. [`Sparkfun AVR core 1.1.13+`](https://github.com/sparkfun/Arduino_Boards) for Sparkfun AVR boards. Use Arduino Board Manager to install. 
- 
- 5. To use with certain example
-   - [`SimpleTimer library`](https://github.com/jfturcot/SimpleTimer) for [ISR_8_PWMs_Array_Complex example](examples/ISR_8_PWMs_Array_Complex).
+1. [`Arduino IDE 1.8.13+` for Arduino](https://www.arduino.cc/en/Main/Software)
+2. [`Arduino AVR core 1.8.3+`](https://github.com/arduino/ArduinoCore-avr) for Arduino AVR boards. Use Arduino Board Manager to install. [![Latest release](https://img.shields.io/github/release/arduino/ArduinoCore-avr.svg)](https://github.com/arduino/ArduinoCore-avr/releases/latest/)
+3. [`Adafruit AVR core 1.4.13+`](https://github.com/adafruit/Adafruit_Arduino_Boards) for Adafruit AVR boards. Use Arduino Board Manager to install. 
+4. [`Sparkfun AVR core 1.1.13+`](https://github.com/sparkfun/Arduino_Boards) for Sparkfun AVR boards. Use Arduino Board Manager to install. 
+
 ---
 ---
 
@@ -132,25 +207,24 @@ The catch is **your function is now part of an ISR (Interrupt Service Routine), 
 
 ### Use Arduino Library Manager
 
-The best and easiest way is to use `Arduino Library Manager`. Search for [**AVR_Slow_PWM**](https://github.com/khoih-prog/AVR_Slow_PWM), then select / install the latest version.
-You can also use this link [![arduino-library-badge](https://www.ardu-badge.com/badge/AVR_Slow_PWM.svg?)](https://www.ardu-badge.com/AVR_Slow_PWM) for more detailed instructions.
+The best and easiest way is to use `Arduino Library Manager`. Search for [**TimerInterrupt**](https://github.com/khoih-prog/TimerInterrupt), then select / install the latest version.
+You can also use this link [![arduino-library-badge](https://www.ardu-badge.com/badge/TimerInterrupt.svg?)](https://www.ardu-badge.com/TimerInterrupt) for more detailed instructions.
 
 ### Manual Install
 
 Another way to install is to:
 
-1. Navigate to [**AVR_Slow_PWM**](https://github.com/khoih-prog/AVR_Slow_PWM) page.
-2. Download the latest release `AVR_Slow_PWM-master.zip`.
-3. Extract the zip file to `AVR_Slow_PWM-master` directory 
-4. Copy whole `AVR_Slow_PWM-master` folder to Arduino libraries' directory such as `~/Arduino/libraries/`.
+1. Navigate to [**TimerInterrupt**](https://github.com/khoih-prog/TimerInterrupt) page.
+2. Download the latest release `TimerInterrupt-master.zip`.
+3. Extract the zip file to `TimerInterrupt-master` directory 
+4. Copy whole `TimerInterrupt-master` folder to Arduino libraries' directory such as `~/Arduino/libraries/`.
 
-### VS Code & PlatformIO
+### VS Code & PlatformIO:
 
 1. Install [VS Code](https://code.visualstudio.com/)
 2. Install [PlatformIO](https://platformio.org/platformio-ide)
-3. Install [**AVR_Slow_PWM** library](https://platformio.org/lib/show/xxxxx/AVR_Slow_PWM) by using [Library Manager](https://platformio.org/lib/show/xxxxx/AVR_Slow_PWM/installation). Search for **AVR_Slow_PWM** in [Platform.io Author's Libraries](https://platformio.org/lib/search?query=author:%22Khoi%20Hoang%22)
+3. Install [**TimerInterrupt** library](https://platformio.org/lib/show/11520/TimerInterrupt) or [**TimerInterrupt** library](https://platformio.org/lib/show/6857/TimerInterrupt) by using [Library Manager](https://platformio.org/lib/show/11520/TimerInterrupt/installation). Search for TimerInterrupt in [Platform.io Author's Libraries](https://platformio.org/lib/search?query=author:%22Khoi%20Hoang%22)
 4. Use included [platformio.ini](platformio/platformio.ini) file from examples to ensure that all dependent libraries will installed automatically. Please visit documentation for the other options and examples at [Project Configuration File](https://docs.platformio.org/page/projectconf.html)
-
 
 ---
 ---
@@ -221,11 +295,11 @@ Before using any Timer, you have to make sure the **Timer has not been used by a
 
 ## Usage
 
-
 Before using any Timer, you have to make sure the Timer has not been used by any other purpose.
 
+### 1. Using only Hardware Timer directly
 
-#### 1. Init Hardware Timer
+### 1.1 Init Hardware Timer
 
 ```
 // Select the timers you're using, here ITimer1
@@ -235,48 +309,98 @@ Before using any Timer, you have to make sure the Timer has not been used by any
 #define USE_TIMER_4     false
 #define USE_TIMER_5     false
 
-// Init AVR_Slow_PWM, each can service 16 different ISR-based PWM channels
-AVR_Slow_PWM ISR_PWM;
+// Init timer ITimer1
+ITimer1.init();
 ```
 
-#### 2. Set PWM Frequency, dutycycle, attach irqCallbackStartFunc and irqCallbackStopFunc functions
+### 1.2 Set Hardware Timer Interval and attach Timer Interrupt Handler function
+
+Use one of these functions with **interval in unsigned long milliseconds**
 
 ```
-void irqCallbackStartFunc()
-{
+// interval (in ms) and duration (in milliseconds). Duration = 0 or not specified => run indefinitely
+template<typename TArg> bool setInterval(unsigned long interval, void (*callback)(TArg), TArg params, unsigned long duration = 0);
 
+// interval (in ms) and duration (in milliseconds). Duration = 0 or not specified => run indefinitely
+bool setInterval(unsigned long interval, timer_callback callback, unsigned long duration = 0);
+
+// Interval (in ms) and duration (in milliseconds). Duration = 0 or not specified => run indefinitely
+template<typename TArg> bool attachInterruptInterval(unsigned long interval, void (*callback)(TArg), TArg params, unsigned long duration = 0);
+
+// Interval (in ms) and duration (in milliseconds). Duration = 0 or not specified => run indefinitely
+bool attachInterruptInterval(unsigned long interval, timer_callback callback, unsigned long duration = 0)
+```
+
+as follows
+
+```
+void TimerHandler()
+{
+  // Doing something here inside ISR
 }
 
-void irqCallbackStopFunc()
-{
-
-}
+#define TIMER_INTERVAL_MS        50L
 
 void setup()
 {
   ....
   
-  // You can use this with PWM_Freq in Hz
-  ISR_PWM.setPWM(PWM_Pin, PWM_Freq, PWM_DutyCycle, irqCallbackStartFunc, irqCallbackStopFunc);
-                   
-  ....                 
+  // Interval in unsigned long millisecs
+  if (ITimer.attachInterruptInterval(TIMER_INTERVAL_MS, TimerHandler))
+    Serial.println("Starting  ITimer OK, millis() = " + String(millis()));
+  else
+    Serial.println("Can't set ITimer. Select another freq. or timer");
 }  
 ```
 
----
----
+### 1.3 Set Hardware Timer Frequency and attach Timer Interrupt Handler function
 
-### Examples: 
+Use one of these functions with **frequency in float Hz**
 
- 1. [ISR_8_PWMs_Array](examples/ISR_8_PWMs_Array)
- 2. [ISR_8_PWMs_Array_Complex](examples/ISR_8_PWMs_Array_Complex)
- 3. [ISR_8_PWMs_Array_Simple](examples/ISR_8_PWMs_Array_Simple) 
+```
+// frequency (in hertz) and duration (in milliseconds). Duration = 0 or not specified => run indefinitely
+bool setFrequency(float frequency, timer_callback_p callback, /* void* */ uint32_t params, unsigned long duration = 0);
 
- 
----
----
+// frequency (in hertz) and duration (in milliseconds). Duration = 0 or not specified => run indefinitely
+bool setFrequency(float frequency, timer_callback callback, unsigned long duration = 0);
 
-### Example [ISR_8_PWMs_Array_Complex](examples/ISR_8_PWMs_Array_Complex)
+// frequency (in hertz) and duration (in milliseconds). Duration = 0 or not specified => run indefinitely
+template<typename TArg> bool attachInterrupt(float frequency, void (*callback)(TArg), TArg params, unsigned long duration = 0);
+
+// frequency (in hertz) and duration (in milliseconds). Duration = 0 or not specified => run indefinitely
+bool attachInterrupt(float frequency, timer_callback callback, unsigned long duration = 0);
+```
+
+as follows
+
+```
+void TimerHandler()
+{
+  // Doing something here inside ISR
+}
+
+#define TIMER_FREQ_HZ        5555.555
+
+void setup()
+{
+  ....
+  
+  // Frequency in float Hz
+  if (ITimer.attachInterrupt(TIMER_FREQ_HZ, TimerHandler))
+    Serial.println("Starting  ITimer OK, millis() = " + String(millis()));
+  else
+    Serial.println("Can't set ITimer. Select another freq. or timer");
+}  
+```
+
+
+### 2. Using 16 ISR_based Timers from 1 Hardware Timer
+
+### 2.1 Important Note
+
+The 16 ISR_based Timers, designed for long timer intervals, only support using **unsigned long millisec intervals**. If you have to use much higher frequency or sub-millisecond interval, you have to use the Hardware Timers directly as in [1.3 Set Hardware Timer Frequency and attach Timer Interrupt Handler function](#13-set-hardware-timer-frequency-and-attach-timer-interrupt-handler-function)
+
+### 2.2 Init Hardware Timer and ISR-based Timer
 
 ```
 #if ( defined(__AVR_ATmega644__) || defined(__AVR_ATmega644A__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644PA__)  || \
@@ -292,292 +416,349 @@ void setup()
   #warning Using Timer3
 #endif
 
-// These define's must be placed at the beginning before #include "ESP32_PWM.h"
-// _PWM_LOGLEVEL_ from 0 to 4
-// Don't define _PWM_LOGLEVEL_ > 0. Only for special ISR debugging only. Can hang the system.
-#define _PWM_LOGLEVEL_      3
+// Init ISR_Timer
+// Each ISR_Timer can service 16 different ISR-based timers
+ISR_Timer ISR_timer;
+```
 
-#define USING_MICROS_RESOLUTION       true  //false 
+### 2.3 Set Hardware Timer Interval and attach Timer Interrupt Handler functions
 
-#include "AVR_Slow_PWM.h"
+```
+void TimerHandler()
+{
+  ISR_timer.run();
+}
 
-#include <SimpleTimer.h>              // https://github.com/jfturcot/SimpleTimer
+#define HW_TIMER_INTERVAL_MS          50L
 
-#define LED_OFF             HIGH
-#define LED_ON              LOW
+#define TIMER_INTERVAL_2S             2000L
+#define TIMER_INTERVAL_5S             5000L
+#define TIMER_INTERVAL_11S            11000L
+#define TIMER_INTERVAL_101S           101000L
+
+// In AVR, avoid doing something fancy in ISR, for example complex Serial.print with String() argument
+// The pure simple Serial.prints here are just for demonstration and testing. Must be eliminate in working environment
+// Or you can get this run-time error / crash
+void doingSomething2s()
+{
+  // Doing something here inside ISR every 2 seconds
+}
+  
+void doingSomething5s()
+{
+  // Doing something here inside ISR every 5 seconds
+}
+
+void doingSomething11s()
+{
+  // Doing something here inside ISR  every 11 seconds
+}
+
+void doingSomething101s()
+{
+  // Doing something here inside ISR every 101 seconds
+}
+
+void setup()
+{
+  ....
+  
+#if USE_TIMER_1
+
+  ITimer1.init();
+
+  // Using ATmega328 used in UNO => 16MHz CPU clock ,
+  // Interval in millisecs
+  if (ITimer1.attachInterruptInterval(HW_TIMER_INTERVAL_MS, TimerHandler))
+  {
+    Serial.print(F("Starting  ITimer1 OK, millis() = ")); Serial.println(millis());
+  }
+  else
+    Serial.println(F("Can't set ITimer1. Select another freq. or timer"));
+    
+#elif USE_TIMER_3
+
+  ITimer3.init();
+  
+  // Interval in millisecs
+  if (ITimer3.attachInterruptInterval(HW_TIMER_INTERVAL_MS, TimerHandler))
+  {
+    Serial.print(F("Starting  ITimer3 OK, millis() = ")); Serial.println(millis());
+  }
+  else
+    Serial.println(F("Can't set ITimer3. Select another freq. or timer"));
+
+#endif
+
+  // Just to demonstrate, don't use too many ISR Timers if not absolutely necessary
+  // You can use up to 16 timer for each ISR_Timer
+  ISR_timer.setInterval(TIMER_INTERVAL_2S, doingSomething2s);
+  ISR_timer.setInterval(TIMER_INTERVAL_5S, doingSomething5s);
+  ISR_timer.setInterval(TIMER_INTERVAL_11S, doingSomething11s);
+  ISR_timer.setInterval(TIMER_INTERVAL_101S, doingSomething101s);
+}  
+```
+
+---
+---
+
+### Examples: 
+
+ 1. [Argument_Complex](examples/Argument_Complex)
+ 2. [Argument_None](examples/Argument_None)
+ 3. [Argument_Simple](examples/Argument_Simple)
+ 4. [**Change_Interval**](examples/Change_Interval). New.
+ 5. [**FakeAnalogWrite**](examples/FakeAnalogWrite).New.
+ 6. [**ISR_16_Timers_Array_Complex**](examples/ISR_16_Timers_Array_Complex). New.
+ 7. [ISR_RPM_Measure](examples/ISR_RPM_Measure)
+ 8. [ISR_Switch](examples/ISR_Switch)
+ 9. [ISR_Timer_Complex](examples/ISR_Timer_Complex)
+10. [**ISR_Timers_Array_Simple**](examples/ISR_Timers_Array_Simple). New.
+11. [ISR_Timer_Switch](examples/ISR_Timer_Switch)
+12. [ISR_Timer_Switches](examples/ISR_Timer_Switches)
+13. [RPM_Measure](examples/RPM_Measure)
+14. [SwitchDebounce](examples/SwitchDebounce)
+15. [TimerDuration](examples/TimerDuration)
+16. [TimerInterruptTest](examples/TimerInterruptTest)
+
+---
+
+### Example [ISR_16_Timers_Array_Complex](examples/ISR_16_Timers_Array_Complex)
+
+```cpp
+// These define's must be placed at the beginning before #include "TimerInterrupt.h"
+// _TIMERINTERRUPT_LOGLEVEL_ from 0 to 4
+// Don't define _TIMERINTERRUPT_LOGLEVEL_ > 0. Only for special ISR debugging only. Can hang the system.
+#define TIMER_INTERRUPT_DEBUG         0
+#define _TIMERINTERRUPT_LOGLEVEL_     0
+
+#if ( defined(__AVR_ATmega644__) || defined(__AVR_ATmega644A__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644PA__)  || \
+        defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO) || defined(ARDUINO_AVR_MINI) ||    defined(ARDUINO_AVR_ETHERNET) || \
+        defined(ARDUINO_AVR_FIO) || defined(ARDUINO_AVR_BT)   || defined(ARDUINO_AVR_LILYPAD) || defined(ARDUINO_AVR_PRO)      || \
+        defined(ARDUINO_AVR_NG) || defined(ARDUINO_AVR_UNO_WIFI_DEV_ED) || defined(ARDUINO_AVR_DUEMILANOVE) || defined(ARDUINO_AVR_FEATHER328P) || \
+        defined(ARDUINO_AVR_METRO) || defined(ARDUINO_AVR_PROTRINKET5) || defined(ARDUINO_AVR_PROTRINKET3) || defined(ARDUINO_AVR_PROTRINKET5FTDI) || \
+        defined(ARDUINO_AVR_PROTRINKET3FTDI) )
+  #define USE_TIMER_1     true
+  #warning Using Timer1
+#else          
+  #define USE_TIMER_3     true
+  #warning Using Timer3
+#endif
+
+#include "TimerInterrupt.h"
+#include "ISR_Timer.h"
+
+#include <SimpleTimer.h>              // https://github.com/schinken/SimpleTimer
 
 #ifndef LED_BUILTIN
   #define LED_BUILTIN       13
 #endif
 
-#ifndef LED_BLUE
-  #define LED_BLUE          10
-#endif
+ISR_Timer ISR_timer;
 
-#ifndef LED_RED
-  #define LED_RED           11
-#endif
+#define LED_TOGGLE_INTERVAL_MS        1000L
 
-#define USING_HW_TIMER_INTERVAL_MS        false   //true
+// You have to use longer time here if having problem because Arduino AVR clock is low, 16MHz => lower accuracy.
+// Tested OK with 1ms when not much load => higher accuracy.
+#define TIMER_INTERVAL_MS            5L
 
-// Don't change these numbers to make higher Timer freq. System can hang
-#define HW_TIMER_INTERVAL_MS        0.1f
-#define HW_TIMER_INTERVAL_FREQ      10000L
-
-volatile uint32_t startMicros = 0;
-
-// Init AVR_Slow_PWM, each can service 16 different ISR-based PWM channels
-AVR_Slow_PWM ISR_PWM;
-
-//////////////////////////////////////////////////////
+volatile uint32_t startMillis = 0;
 
 void TimerHandler()
 {
-  ISR_PWM.run();
+  static bool toggle  = false;
+  static int timeRun  = 0;
+
+  ISR_timer.run();
+
+  // Toggle LED every LED_TOGGLE_INTERVAL_MS = 2000ms = 2s
+  if (++timeRun == ((LED_TOGGLE_INTERVAL_MS) / TIMER_INTERVAL_MS) )
+  {
+    timeRun = 0;
+
+    //timer interrupt toggles pin LED_BUILTIN
+    digitalWrite(LED_BUILTIN, toggle);
+    toggle = !toggle;
+  }
 }
 
 /////////////////////////////////////////////////
 
-#define PIN_D0      0
-#define PIN_D1      1
-#define PIN_D2      2
-#define PIN_D3      3
-#define PIN_D4      4
-#define PIN_D5      5
-#define PIN_D6      6
+#define NUMBER_ISR_TIMERS         16
 
-// You can assign pins here. Be careful to select good pin to use or crash, e.g pin 6-11
-uint32_t PWM_Pin[] =
-{
-  LED_BUILTIN, PIN_D0, PIN_D1,  PIN_D2,  PIN_D3,  PIN_D4,  PIN_D5,  PIN_D6
-};
+typedef void (*irqCallback)  (void);
 
-#define NUMBER_ISR_PWMS         ( sizeof(PWM_Pin) / sizeof(uint32_t) )
-
-typedef void (*irqCallback)  ();
-
-//////////////////////////////////////////////////////
+/////////////////////////////////////////////////
 
 #define USE_COMPLEX_STRUCT      true
 
-//////////////////////////////////////////////////////
-
 #if USE_COMPLEX_STRUCT
 
-typedef struct
-{
-  uint32_t      PWM_Pin;
-  irqCallback   irqCallbackStartFunc;
-  irqCallback   irqCallbackStopFunc;
+  typedef struct 
+  {
+    irqCallback   irqCallbackFunc;
+    uint32_t      TimerInterval;
+    unsigned long deltaMillis;
+    unsigned long previousMillis;
+  } ISRTimerData;
+  
+  // In NRF52, avoid doing something fancy in ISR, for example Serial.print()
+  // The pure simple Serial.prints here are just for demonstration and testing. Must be eliminate in working environment
+  // Or you can get this run-time error / crash
+  
+  void doingSomething(int index);
 
-  uint32_t      PWM_Freq;
+#else
 
-  uint32_t      PWM_DutyCycle;
+  volatile unsigned long deltaMillis    [NUMBER_ISR_TIMERS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+  volatile unsigned long previousMillis [NUMBER_ISR_TIMERS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+  
+  // You can assign any interval for any timer here, in milliseconds
+  uint32_t TimerInterval[NUMBER_ISR_TIMERS] =
+  {
+    5000L,  10000L,  15000L,  20000L,  25000L,  30000L,  35000L,  40000L,
+    45000L, 50000L,  55000L,  60000L,  65000L,  70000L,  75000L,  80000L
+  };
+  
+  void doingSomething(int index)
+  {
+    unsigned long currentMillis  = millis();
+    
+    deltaMillis[index]    = currentMillis - previousMillis[index];
+    previousMillis[index] = currentMillis;
+  }
 
-  uint32_t      deltaMicrosStart;
-  uint32_t      previousMicrosStart;
-
-  uint32_t      deltaMicrosStop;
-  uint32_t      previousMicrosStop;
-
-} ISR_PWM_Data;
-
-// In nRF52, avoid doing something fancy in ISR, for example Serial.print()
-// The pure simple Serial.prints here are just for demonstration and testing. Must be eliminate in working environment
-// Or you can get this run-time error / crash
-
-void doingSomethingStart(int index);
-
-void doingSomethingStop(int index);
-
-#else   // #if USE_COMPLEX_STRUCT
-
-volatile unsigned long deltaMicrosStart    [NUMBER_ISR_PWMS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-volatile unsigned long previousMicrosStart [NUMBER_ISR_PWMS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-
-volatile unsigned long deltaMicrosStop     [NUMBER_ISR_PWMS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-volatile unsigned long previousMicrosStop  [NUMBER_ISR_PWMS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-
-
-// You can assign any interval for any timer here, in Microseconds
-uint32_t PWM_Period[NUMBER_ISR_PWMS] =
-{
-  1000L,   500L,   333L,   250L,   200L,   166L,   142L,   125L
-};
-
-
-// You can assign any interval for any timer here, in Hz
-uint32_t PWM_Freq[NUMBER_ISR_PWMS] =
-{
-  1,  2,  3,  4,  5,  6,  7,  8
-};
-
-// You can assign any interval for any timer here, in Microseconds
-uint32_t PWM_DutyCycle[NUMBER_ISR_PWMS] =
-{
-  5, 10, 20, 25, 30, 35, 40, 45
-};
-
-void doingSomethingStart(int index)
-{
-  unsigned long currentMicros  = micros();
-
-  deltaMicrosStart[index]    = currentMicros - previousMicrosStart[index];
-  previousMicrosStart[index] = currentMicros;
-}
-
-void doingSomethingStop(int index)
-{
-  unsigned long currentMicros  = micros();
-
-  // Count from start to stop PWM pulse
-  deltaMicrosStop[index]    = currentMicros - previousMicrosStart[index];
-  previousMicrosStop[index] = currentMicros;
-}
-
-#endif    // #if USE_COMPLEX_STRUCT
+#endif
 
 ////////////////////////////////////
 // Shared
 ////////////////////////////////////
 
-void doingSomethingStart0()
+void doingSomething0()
 {
-  doingSomethingStart(0);
+  doingSomething(0);
 }
 
-void doingSomethingStart1()
+void doingSomething1()
 {
-  doingSomethingStart(1);
+  doingSomething(1);
 }
 
-void doingSomethingStart2()
+void doingSomething2()
 {
-  doingSomethingStart(2);
+  doingSomething(2);
 }
 
-void doingSomethingStart3()
+void doingSomething3()
 {
-  doingSomethingStart(3);
+  doingSomething(3);
 }
 
-void doingSomethingStart4()
+void doingSomething4()
 {
-  doingSomethingStart(4);
+  doingSomething(4);
 }
 
-void doingSomethingStart5()
+void doingSomething5()
 {
-  doingSomethingStart(5);
+  doingSomething(5);
 }
 
-void doingSomethingStart6()
+void doingSomething6()
 {
-  doingSomethingStart(6);
+  doingSomething(6);
 }
 
-void doingSomethingStart7()
+void doingSomething7()
 {
-  doingSomethingStart(7);
+  doingSomething(7);
 }
 
-
-//////////////////////////////////////////////////////
-
-void doingSomethingStop0()
+void doingSomething8()
 {
-  doingSomethingStop(0);
+  doingSomething(8);
 }
 
-void doingSomethingStop1()
+void doingSomething9()
 {
-  doingSomethingStop(1);
+  doingSomething(9);
 }
 
-void doingSomethingStop2()
+void doingSomething10()
 {
-  doingSomethingStop(2);
+  doingSomething(10);
 }
 
-void doingSomethingStop3()
+void doingSomething11()
 {
-  doingSomethingStop(3);
+  doingSomething(11);
 }
 
-void doingSomethingStop4()
+void doingSomething12()
 {
-  doingSomethingStop(4);
+  doingSomething(12);
 }
 
-void doingSomethingStop5()
+void doingSomething13()
 {
-  doingSomethingStop(5);
+  doingSomething(13);
 }
 
-void doingSomethingStop6()
+void doingSomething14()
 {
-  doingSomethingStop(6);
+  doingSomething(14);
 }
 
-void doingSomethingStop7()
+void doingSomething15()
 {
-  doingSomethingStop(7);
+  doingSomething(15);
 }
-
-
-//////////////////////////////////////////////////////
 
 #if USE_COMPLEX_STRUCT
 
-ISR_PWM_Data curISR_PWM_Data[NUMBER_ISR_PWMS] =
-{
-  // pin, irqCallbackStartFunc, irqCallbackStopFunc, PWM_Freq, PWM_DutyCycle, deltaMicrosStart, previousMicrosStart, deltaMicrosStop, previousMicrosStop
-  { LED_BUILTIN,  doingSomethingStart0,    doingSomethingStop0,    1,   5, 0, 0, 0, 0 },
-  { PIN_D0,       doingSomethingStart1,    doingSomethingStop1,    2,  10, 0, 0, 0, 0 },
-  { PIN_D1,       doingSomethingStart2,    doingSomethingStop2,    3,  20, 0, 0, 0, 0 },
-  { PIN_D2,       doingSomethingStart3,    doingSomethingStop3,    4,  25, 0, 0, 0, 0 },
-  { PIN_D3,       doingSomethingStart4,    doingSomethingStop4,    5,  30, 0, 0, 0, 0 },
-  { PIN_D4,       doingSomethingStart5,    doingSomethingStop5,    6,  35, 0, 0, 0, 0 },
-  { PIN_D5,       doingSomethingStart6,    doingSomethingStop6,    7,  40, 0, 0, 0, 0 },
-  { PIN_D6,       doingSomethingStart7,    doingSomethingStop7,    8,  45, 0, 0, 0, 0 },
-};
+  ISRTimerData curISRTimerData[NUMBER_ISR_TIMERS] =
+  {
+    //irqCallbackFunc, TimerInterval, deltaMillis, previousMillis
+    { doingSomething0,    5000L, 0, 0 },
+    { doingSomething1,   10000L, 0, 0 },
+    { doingSomething2,   15000L, 0, 0 },
+    { doingSomething3,   20000L, 0, 0 },
+    { doingSomething4,   25000L, 0, 0 },
+    { doingSomething5,   30000L, 0, 0 },
+    { doingSomething6,   35000L, 0, 0 },
+    { doingSomething7,   40000L, 0, 0 },
+    { doingSomething8,   45000L, 0, 0 },
+    { doingSomething9,   50000L, 0, 0 },
+    { doingSomething10,  55000L, 0, 0 },
+    { doingSomething11,  60000L, 0, 0 },
+    { doingSomething12,  65000L, 0, 0 },
+    { doingSomething13,  70000L, 0, 0 },
+    { doingSomething14,  75000L, 0, 0 },
+    { doingSomething15,  80000L, 0, 0 }
+  };
+  
+  void doingSomething(int index)
+  {
+    unsigned long currentMillis  = millis();
+    
+    curISRTimerData[index].deltaMillis    = currentMillis - curISRTimerData[index].previousMillis;
+    curISRTimerData[index].previousMillis = currentMillis;
+  }
 
+#else
 
-void doingSomethingStart(int index)
-{
-  unsigned long currentMicros  = micros();
+  irqCallback irqCallbackFunc[NUMBER_ISR_TIMERS] =
+  {
+    doingSomething0,  doingSomething1,  doingSomething2,  doingSomething3,
+    doingSomething4,  doingSomething5,  doingSomething6,  doingSomething7,
+    doingSomething8,  doingSomething9,  doingSomething10, doingSomething11,
+    doingSomething12, doingSomething13, doingSomething14, doingSomething15
+  };
 
-  curISR_PWM_Data[index].deltaMicrosStart    = currentMicros - curISR_PWM_Data[index].previousMicrosStart;
-  curISR_PWM_Data[index].previousMicrosStart = currentMicros;
-}
+#endif
 
-void doingSomethingStop(int index)
-{
-  unsigned long currentMicros  = micros();
+////////////////////////////////////////////////
 
-  //curISR_PWM_Data[index].deltaMicrosStop     = currentMicros - curISR_PWM_Data[index].previousMicrosStop;
-  // Count from start to stop PWM pulse
-  curISR_PWM_Data[index].deltaMicrosStop     = currentMicros - curISR_PWM_Data[index].previousMicrosStart;
-  curISR_PWM_Data[index].previousMicrosStop  = currentMicros;
-}
-
-#else   // #if USE_COMPLEX_STRUCT
-
-irqCallback irqCallbackStartFunc[NUMBER_ISR_PWMS] =
-{
-  doingSomethingStart0,  doingSomethingStart1,  doingSomethingStart2,  doingSomethingStart3,
-  doingSomethingStart4,  doingSomethingStart5,  doingSomethingStart6,  doingSomethingStart7
-};
-
-irqCallback irqCallbackStopFunc[NUMBER_ISR_PWMS] =
-{
-  doingSomethingStop0,  doingSomethingStop1,  doingSomethingStop2,  doingSomethingStop3,
-  doingSomethingStop4,  doingSomethingStop5,  doingSomethingStop6,  doingSomethingStop7
-};
-
-#endif    // #if USE_COMPLEX_STRUCT
-
-//////////////////////////////////////////////////////
 
 #define SIMPLE_TIMER_MS        2000L
 
@@ -590,81 +771,56 @@ SimpleTimer simpleTimer;
 // 2. Very long "do", "while", "for" loops without predetermined exit time.
 void simpleTimerDoingSomething2s()
 {
-  static unsigned long previousMicrosStart = startMicros;
+  static unsigned long previousMillis = startMillis;
 
-  unsigned long currMicros = micros();
+  unsigned long currMillis = millis();
 
-  Serial.print(F("SimpleTimer (us): ")); Serial.print(SIMPLE_TIMER_MS);
-  Serial.print(F(", us : ")); Serial.print(currMicros);
-  Serial.print(F(", Dus : ")); Serial.println(currMicros - previousMicrosStart);
+  Serial.print(F("SimpleTimer : "));Serial.print(SIMPLE_TIMER_MS / 1000);
+  Serial.print(F(", ms : ")); Serial.print(currMillis);
+  Serial.print(F(", Dms : ")); Serial.println(currMillis - previousMillis);
 
-  for (uint16_t i = 0; i < NUMBER_ISR_PWMS; i++)
+  for (uint16_t i = 0; i < NUMBER_ISR_TIMERS; i++)
   {
-#if USE_COMPLEX_STRUCT
-    Serial.print(F("PWM Channel : ")); Serial.print(i);
-    Serial.print(F(", prog Period (ms): "));
-
-    Serial.print(1000.f / curISR_PWM_Data[i].PWM_Freq);
-
-    Serial.print(F(", actual : ")); Serial.print((uint32_t) curISR_PWM_Data[i].deltaMicrosStart);
-
-    Serial.print(F(", prog DutyCycle : "));
-
-    Serial.print(curISR_PWM_Data[i].PWM_DutyCycle);
-
-    Serial.print(F(", actual : ")); Serial.println((float) curISR_PWM_Data[i].deltaMicrosStop * 100.0f / curISR_PWM_Data[i].deltaMicrosStart);
-    //Serial.print(F(", actual deltaMicrosStop : ")); Serial.println(curISR_PWM_Data[i].deltaMicrosStop);
-    //Serial.print(F(", actual deltaMicrosStart : ")); Serial.println(curISR_PWM_Data[i].deltaMicrosStart);
-
+#if USE_COMPLEX_STRUCT    
+    Serial.print(F("Timer : ")); Serial.print(i);
+    Serial.print(F(", programmed : ")); Serial.print(curISRTimerData[i].TimerInterval);
+    Serial.print(F(", actual : ")); Serial.println(curISRTimerData[i].deltaMillis);
 #else
-
-    Serial.print(F("PWM Channel : ")); Serial.print(i);
-
-    Serial.print(1000 / PWM_Freq[i]);
-
-    Serial.print(F(", prog. Period (us): ")); Serial.print(PWM_Period[i]);
-    Serial.print(F(", actual : ")); Serial.print(deltaMicrosStart[i]);
-
-    Serial.print(F(", prog DutyCycle : "));
-
-    Serial.print(PWM_DutyCycle[i]);
-
-    Serial.print(F(", actual : ")); Serial.println( (float) deltaMicrosStop[i] * 100.0f / deltaMicrosStart[i]);
-    //Serial.print(F(", actual deltaMicrosStop : ")); Serial.println(deltaMicrosStop[i]);
-    //Serial.print(F(", actual deltaMicrosStart : ")); Serial.println(deltaMicrosStart[i]);
-#endif
+    Serial.print(F("Timer : ")); Serial.print(i);
+    Serial.print(F(", programmed : ")); Serial.print(TimerInterval[i]);
+    Serial.print(F(", actual : ")); Serial.println(deltaMillis[i]);
+#endif    
   }
 
-  previousMicrosStart = currMicros;
+  previousMillis = currMillis;
 }
 
-void setup()
+void setup() 
 {
+  pinMode(LED_BUILTIN, OUTPUT);
+
   Serial.begin(115200);
   while (!Serial);
 
-  delay(2000);
-
-  Serial.print(F("\nStarting ISR_8_PWMs_Array_Complex on ")); Serial.println(BOARD_NAME);
-  Serial.println(AVR_SLOW_PWM_VERSION);
+  Serial.print(F("\nStarting ISR_16_Timers_Array_Complex on "));
+  Serial.println(BOARD_TYPE);
+  Serial.println(TIMER_INTERRUPT_VERSION);
   Serial.print(F("CPU Frequency = ")); Serial.print(F_CPU / 1000000); Serial.println(F(" MHz"));
 
-  // Timer0 is used for micros(), micros(), delay(), etc and can't be used
+  // Timer0 is used for micros(), millis(), delay(), etc and can't be used
   // Select Timer 1-2 for UNO, 1-5 for MEGA, 1,3,4 for 16u4/32u4
   // Timer 2 is 8-bit timer, only for higher frequency
   // Timer 4 of 16u4 and 32u4 is 8/10-bit timer, only for higher frequency
-
-#if USING_HW_TIMER_INTERVAL_MS
-
+  
 #if USE_TIMER_1
 
   ITimer1.init();
 
   // Using ATmega328 used in UNO => 16MHz CPU clock ,
 
-  if (ITimer1.attachInterruptInterval(HW_TIMER_INTERVAL_MS, TimerHandler))
+  if (ITimer1.attachInterruptInterval(TIMER_INTERVAL_MS, TimerHandler))
   {
-    Serial.print(F("Starting  ITimer1 OK, micros() = ")); Serial.println(micros());
+    Serial.print(F("Starting  ITimer1 OK, millis() = ")); Serial.println(millis());
   }
   else
     Serial.println(F("Can't set ITimer1. Select another freq. or timer"));
@@ -673,70 +829,29 @@ void setup()
 
   ITimer3.init();
 
-  if (ITimer3.attachInterruptInterval(HW_TIMER_INTERVAL_MS, TimerHandler))
+  if (ITimer3.attachInterruptInterval(TIMER_INTERVAL_MS, TimerHandler))
   {
-    Serial.print(F("Starting  ITimer3 OK, micros() = ")); Serial.println(micros());
+    Serial.print(F("Starting  ITimer3 OK, millis() = ")); Serial.println(millis());
   }
   else
     Serial.println(F("Can't set ITimer3. Select another freq. or timer"));
 
 #endif
 
-#else
-
-#if USE_TIMER_1
-
-  ITimer1.init();
-
-  // Using ATmega328 used in UNO => 16MHz CPU clock ,
-
-  if (ITimer1.attachInterrupt(HW_TIMER_INTERVAL_FREQ, TimerHandler))
-  {
-    Serial.print(F("Starting  ITimer1 OK, micros() = ")); Serial.println(micros());
-  }
-  else
-    Serial.println(F("Can't set ITimer1. Select another freq. or timer"));
-    
-#elif USE_TIMER_3
-
-  ITimer3.init();
-
-  if (ITimer3.attachInterrupt(HW_TIMER_INTERVAL_FREQ, TimerHandler))
-  {
-    Serial.print(F("Starting  ITimer3 OK, micros() = ")); Serial.println(micros());
-  }
-  else
-    Serial.println(F("Can't set ITimer3. Select another freq. or timer"));
-
-#endif
-
-#endif
-
-  startMicros = micros();
+  //ISR_timer.setInterval(2000L, doingSomething2s);
+  //ISR_timer.setInterval(5000L, doingSomething5s);
 
   // Just to demonstrate, don't use too many ISR Timers if not absolutely necessary
-  // You can use up to 16 timer for each ISR_PWM
-
-  for (uint16_t i = 0; i < NUMBER_ISR_PWMS; i++)
+  // You can use up to 16 timer for each ISR_Timer
+  for (uint16_t i = 0; i < NUMBER_ISR_TIMERS; i++)
   {
 #if USE_COMPLEX_STRUCT
-    curISR_PWM_Data[i].previousMicrosStart = startMicros;
-    //ISR_PWM.setInterval(curISR_PWM_Data[i].PWM_Period, curISR_PWM_Data[i].irqCallbackStartFunc);
-
-    //void setPWM(uint32_t pin, uint32_t frequency, uint32_t dutycycle
-    // , timer_callback_p StartCallback = nullptr, timer_callback_p StopCallback = nullptr)
-
-    // You can use this with PWM_Freq in Hz
-    ISR_PWM.setPWM(curISR_PWM_Data[i].PWM_Pin, curISR_PWM_Data[i].PWM_Freq, curISR_PWM_Data[i].PWM_DutyCycle,
-                   curISR_PWM_Data[i].irqCallbackStartFunc, curISR_PWM_Data[i].irqCallbackStopFunc);
-
+    curISRTimerData[i].previousMillis = startMillis;
+    ISR_timer.setInterval(curISRTimerData[i].TimerInterval, curISRTimerData[i].irqCallbackFunc);
 #else
-    previousMicrosStart[i] = micros();
-
-    // You can use this with PWM_Freq in Hz
-    ISR_PWM.setPWM(PWM_Pin[i], PWM_Freq[i], PWM_DutyCycle[i], irqCallbackStartFunc[i], irqCallbackStopFunc[i]);
-
-#endif
+    previousMillis[i] = startMillis;
+    ISR_timer.setInterval(TimerInterval[i], irqCallbackFunc[i]);
+#endif    
   }
 
   // You need this timer for non-critical tasks. Avoid abusing ISR if not absolutely necessary.
@@ -748,169 +863,218 @@ void setup()
 void loop()
 {
   // This unadvised blocking task is used to demonstrate the blocking effects onto the execution and accuracy to Software timer
-  // You see the time elapse of ISR_PWM still accurate, whereas very unaccurate for Software Timer
+  // You see the time elapse of ISR_Timer still accurate, whereas very unaccurate for Software Timer
   // The time elapse for 2000ms software timer now becomes 3000ms (BLOCKING_TIME_MS)
-  // While that of ISR_PWM is still prefect.
+  // While that of ISR_Timer is still prefect.
   delay(BLOCKING_TIME_MS);
 
   // You need this Software timer for non-critical tasks. Avoid abusing ISR if not absolutely necessary
-  // You don't need to and never call ISR_PWM.run() here in the loop(). It's already handled by ISR timer.
+  // You don't need to and never call ISR_Timer.run() here in the loop(). It's already handled by ISR timer.
   simpleTimer.run();
 }
 ```
+
 ---
 ---
 
 ### Debug Terminal Output Samples
 
-### 1. ISR_8_PWMs_Array_Complex on Arduino AVR Leonardo ATMega32U4
+### 1. ISR_16_Timers_Array_Complex on Arduino AVR Nano-V3 board
 
-The following is the sample terminal output when running example [ISR_8_PWMs_Array_Complex](examples/ISR_8_PWMs_Array_Complex) to demonstrate how to use multiple PWM channels with complex callback functions, the accuracy of ISR Hardware PWM-channels, **especially when system is very busy**.  The ISR PWM-channels is **running exactly according to corresponding programmed periods and duty-cycles**
+The following is the sample terminal output when running example [ISR_16_Timers_Array_Complex](examples/ISR_16_Timers_Array_Complex) on **Arduino Nano V3** to demonstrate the accuracy of ISR Hardware Timer, **especially when system is very busy**.  The ISR timer is **programmed for 2s, is activated exactly after 2.000s !!!**
 
+While software timer, **programmed for 2s, is activated after more than 10.000s in loop().
 
 ```
-Starting ISR_8_PWMs_Array_Complex on Arduino AVR ATMega32U4
-AVR_Slow_PWM v1.0.0
+
+Starting ISR_16_Timers_Array_Complex on Arduino AVR UNO, Nano, etc.
+TimerInterrupt v1.5.0
 CPU Frequency = 16 MHz
-[PWM] T3
-[PWM] Freq * 1000 = 10000000.00
-[PWM] F_CPU = 16000000 , preScalerDiv = 1
-[PWM] OCR = 1599 , preScalerIndex = 1
-[PWM] OK in loop => _OCR = 1599
-[PWM] _preScalerIndex = 1 , preScalerDiv = 1
-Starting  ITimer3 OK, micros() = 3520328
-Channel : 0	Period : 1000000		OnTime : 50000	Start_Time : 3520968
-Channel : 1	Period : 500000		OnTime : 50000	Start_Time : 3520968
-Channel : 2	Period : 333333		OnTime : 66666	Start_Time : 3520968
-Channel : 3	Period : 250000		OnTime : 62500	Start_Time : 3520968
-Channel : 4	Period : 200000		OnTime : 60000	Start_Time : 3520968
-Channel : 5	Period : 166666		OnTime : 58333	Start_Time : 3520968
-Channel : 6	Period : 142857		OnTime : 57142	Start_Time : 3520968
-Channel : 7	Period : 125000		OnTime : 56250	Start_Time : 3520968
-SimpleTimer (us): 2000, us : 13547548, Dus : 10026624
-PWM Channel : 0, prog Period (ms): 1000.00, actual : 1000000, prog DutyCycle : 5, actual : 5.00
-PWM Channel : 1, prog Period (ms): 500.00, actual : 500016, prog DutyCycle : 10, actual : 10.00
-PWM Channel : 2, prog Period (ms): 333.33, actual : 333396, prog DutyCycle : 20, actual : 19.98
-PWM Channel : 3, prog Period (ms): 250.00, actual : 250028, prog DutyCycle : 25, actual : 24.96
-PWM Channel : 4, prog Period (ms): 200.00, actual : 200192, prog DutyCycle : 30, actual : 29.87
-PWM Channel : 5, prog Period (ms): 166.67, actual : 166792, prog DutyCycle : 35, actual : 34.89
-PWM Channel : 6, prog Period (ms): 142.86, actual : 142992, prog DutyCycle : 40, actual : 39.87
-PWM Channel : 7, prog Period (ms): 125.00, actual : 125192, prog DutyCycle : 45, actual : 44.89
-SimpleTimer (us): 2000, us : 23596540, Dus : 10048992
-PWM Channel : 0, prog Period (ms): 1000.00, actual : 1000000, prog DutyCycle : 5, actual : 5.00
-PWM Channel : 1, prog Period (ms): 500.00, actual : 500012, prog DutyCycle : 10, actual : 10.00
-PWM Channel : 2, prog Period (ms): 333.33, actual : 333396, prog DutyCycle : 20, actual : 19.98
-PWM Channel : 3, prog Period (ms): 250.00, actual : 250028, prog DutyCycle : 25, actual : 24.95
-PWM Channel : 4, prog Period (ms): 200.00, actual : 200192, prog DutyCycle : 30, actual : 29.88
-PWM Channel : 5, prog Period (ms): 166.67, actual : 166796, prog DutyCycle : 35, actual : 34.90
-PWM Channel : 6, prog Period (ms): 142.86, actual : 142992, prog DutyCycle : 40, actual : 39.87
-PWM Channel : 7, prog Period (ms): 125.00, actual : 125192, prog DutyCycle : 45, actual : 44.89
+Starting  ITimer1 OK, millis() = 7
+SimpleTimer : 2, ms : 10007, Dms : 10007
+Timer : 0, programmed : 5000, actual : 4997
+Timer : 1, programmed : 10000, actual : 10005
+Timer : 2, programmed : 15000, actual : 0
+Timer : 3, programmed : 20000, actual : 0
+Timer : 4, programmed : 25000, actual : 0
+Timer : 5, programmed : 30000, actual : 0
+Timer : 6, programmed : 35000, actual : 0
+Timer : 7, programmed : 40000, actual : 0
+Timer : 8, programmed : 45000, actual : 0
+Timer : 9, programmed : 50000, actual : 0
+Timer : 10, programmed : 55000, actual : 0
+Timer : 11, programmed : 60000, actual : 0
+Timer : 12, programmed : 65000, actual : 0
+Timer : 13, programmed : 70000, actual : 0
+Timer : 14, programmed : 75000, actual : 0
+Timer : 15, programmed : 80000, actual : 0
+SimpleTimer : 2, ms : 20071, Dms : 10064
+Timer : 0, programmed : 5000, actual : 5002
+Timer : 1, programmed : 10000, actual : 10004
+Timer : 2, programmed : 15000, actual : 15007
+Timer : 3, programmed : 20000, actual : 20009
+Timer : 4, programmed : 25000, actual : 0
+Timer : 5, programmed : 30000, actual : 0
+Timer : 6, programmed : 35000, actual : 0
+Timer : 7, programmed : 40000, actual : 0
+Timer : 8, programmed : 45000, actual : 0
+Timer : 9, programmed : 50000, actual : 0
+Timer : 10, programmed : 55000, actual : 0
+Timer : 11, programmed : 60000, actual : 0
+Timer : 12, programmed : 65000, actual : 0
+Timer : 13, programmed : 70000, actual : 0
+Timer : 14, programmed : 75000, actual : 0
+Timer : 15, programmed : 80000, actual : 0
+SimpleTimer : 2, ms : 30136, Dms : 10065
+Timer : 0, programmed : 5000, actual : 5001
+Timer : 1, programmed : 10000, actual : 9999
+Timer : 2, programmed : 15000, actual : 15001
+Timer : 3, programmed : 20000, actual : 20009
+Timer : 4, programmed : 25000, actual : 25007
+Timer : 5, programmed : 30000, actual : 30008
+Timer : 6, programmed : 35000, actual : 0
+Timer : 7, programmed : 40000, actual : 0
+Timer : 8, programmed : 45000, actual : 0
+Timer : 9, programmed : 50000, actual : 0
+Timer : 10, programmed : 55000, actual : 0
+Timer : 11, programmed : 60000, actual : 0
+Timer : 12, programmed : 65000, actual : 0
+Timer : 13, programmed : 70000, actual : 0
+Timer : 14, programmed : 75000, actual : 0
+Timer : 15, programmed : 80000, actual : 0
+SimpleTimer : 2, ms : 40202, Dms : 10066
+Timer : 0, programmed : 5000, actual : 5002
+Timer : 1, programmed : 10000, actual : 9999
+Timer : 2, programmed : 15000, actual : 15001
+Timer : 3, programmed : 20000, actual : 19998
+Timer : 4, programmed : 25000, actual : 25007
+Timer : 5, programmed : 30000, actual : 30008
+Timer : 6, programmed : 35000, actual : 35011
+Timer : 7, programmed : 40000, actual : 40007
+Timer : 8, programmed : 45000, actual : 0
+Timer : 9, programmed : 50000, actual : 0
+Timer : 10, programmed : 55000, actual : 0
+Timer : 11, programmed : 60000, actual : 0
+Timer : 12, programmed : 65000, actual : 0
+Timer : 13, programmed : 70000, actual : 0
+Timer : 14, programmed : 75000, actual : 0
+Timer : 15, programmed : 80000, actual : 0
+SimpleTimer : 2, ms : 50270, Dms : 10068
+Timer : 0, programmed : 5000, actual : 4998
+Timer : 1, programmed : 10000, actual : 10000
+Timer : 2, programmed : 15000, actual : 15001
+Timer : 3, programmed : 20000, actual : 19998
+Timer : 4, programmed : 25000, actual : 25000
+Timer : 5, programmed : 30000, actual : 30008
+Timer : 6, programmed : 35000, actual : 35011
+Timer : 7, programmed : 40000, actual : 40007
+Timer : 8, programmed : 45000, actual : 45009
+Timer : 9, programmed : 50000, actual : 50007
+Timer : 10, programmed : 55000, actual : 0
+Timer : 11, programmed : 60000, actual : 0
+Timer : 12, programmed : 65000, actual : 0
+Timer : 13, programmed : 70000, actual : 0
+Timer : 14, programmed : 75000, actual : 0
+Timer : 15, programmed : 80000, actual : 0
+SimpleTimer : 2, ms : 60338, Dms : 10068
+Timer : 0, programmed : 5000, actual : 4997
+Timer : 1, programmed : 10000, actual : 9999
+Timer : 2, programmed : 15000, actual : 14997
+Timer : 3, programmed : 20000, actual : 19999
+Timer : 4, programmed : 25000, actual : 25000
+Timer : 5, programmed : 30000, actual : 29998
+Timer : 6, programmed : 35000, actual : 35011
+Timer : 7, programmed : 40000, actual : 40007
+Timer : 8, programmed : 45000, actual : 45009
+Timer : 9, programmed : 50000, actual : 50007
+Timer : 10, programmed : 55000, actual : 55009
+Timer : 11, programmed : 60000, actual : 60006
+Timer : 12, programmed : 65000, actual : 0
+Timer : 13, programmed : 70000, actual : 0
+Timer : 14, programmed : 75000, actual : 0
+Timer : 15, programmed : 80000, actual : 0
+SimpleTimer : 2, ms : 70408, Dms : 10070
+Timer : 0, programmed : 5000, actual : 4997
+Timer : 1, programmed : 10000, actual : 9999
+Timer : 2, programmed : 15000, actual : 14997
+Timer : 3, programmed : 20000, actual : 19999
+Timer : 4, programmed : 25000, actual : 25000
+Timer : 5, programmed : 30000, actual : 29998
+Timer : 6, programmed : 35000, actual : 34999
+Timer : 7, programmed : 40000, actual : 40007
+Timer : 8, programmed : 45000, actual : 45009
+Timer : 9, programmed : 50000, actual : 50007
+Timer : 10, programmed : 55000, actual : 55009
+Timer : 11, programmed : 60000, actual : 60006
+Timer : 12, programmed : 65000, actual : 65008
+Timer : 13, programmed : 70000, actual : 70010
+Timer : 14, programmed : 75000, actual : 0
+Timer : 15, programmed : 80000, actual : 0
+SimpleTimer : 2, ms : 80479, Dms : 10071
+Timer : 0, programmed : 5000, actual : 4997
+Timer : 1, programmed : 10000, actual : 10000
+Timer : 2, programmed : 15000, actual : 15002
+Timer : 3, programmed : 20000, actual : 19999
+Timer : 4, programmed : 25000, actual : 25001
+Timer : 5, programmed : 30000, actual : 29998
+Timer : 6, programmed : 35000, actual : 34999
+Timer : 7, programmed : 40000, actual : 40003
+Timer : 8, programmed : 45000, actual : 45009
+Timer : 9, programmed : 50000, actual : 50007
+Timer : 10, programmed : 55000, actual : 55009
+Timer : 11, programmed : 60000, actual : 60006
+Timer : 12, programmed : 65000, actual : 65008
+Timer : 13, programmed : 70000, actual : 70010
+Timer : 14, programmed : 75000, actual : 75008
+Timer : 15, programmed : 80000, actual : 80010
+
 ```
 
 ---
 
-### 2. ISR_8_PWMs_Array on AVR Mega2560/ADK
+### 2. Change_Interval on Arduino AVR Mega2560 board
 
-The following is the sample terminal output when running example [**ISR_8_PWMs_Array**](examples/ISR_8_PWMs_Array) on **AVR Mega2560/ADK** to demonstrate how to use multiple PWM channels with simple callback functions.
+The following is the sample terminal output when running example [Change_Interval](examples/Change_Interval) on **AVR Mega2560** to demonstrate how to change Timer Interval on-the-fly
 
 ```
-Starting ISR_8_PWMs_Array_Complex on Arduino AVR Mega2560/ADK
-AVR_Slow_PWM v1.0.0
+Starting Change_Interval on Arduino AVR Mega2560/ADK
+TimerInterrupt v1.5.0
 CPU Frequency = 16 MHz
-[PWM] T3
-[PWM] Freq * 1000 = 10000000.00
-[PWM] F_CPU = 16000000 , preScalerDiv = 1
-[PWM] OCR = 1599 , preScalerIndex = 1
-[PWM] OK in loop => _OCR = 1599
-[PWM] _preScalerIndex = 1 , preScalerDiv = 1
-Starting  ITimer3 OK, micros() = 2024104
-Channel : 0	Period : 1000000		OnTime : 50000	Start_Time : 2024988
-Channel : 1	Period : 500000		OnTime : 50000	Start_Time : 2024988
-Channel : 2	Period : 333333		OnTime : 66666	Start_Time : 2024988
-Channel : 3	Period : 250000		OnTime : 62500	Start_Time : 2024988
-Channel : 4	Period : 200000		OnTime : 60000	Start_Time : 2024988
-Channel : 5	Period : 166666		OnTime : 58333	Start_Time : 2024988
-Channel : 6	Period : 142857		OnTime : 57142	Start_Time : 2024988
-Channel : 7	Period : 125000		OnTime : 56250	Start_Time : 2024988
-SimpleTimer (us): 2000, us : 12070388, Dus : 10045444
-PWM Channel : 0, prog Period (ms): 1000.00, actual : 1000000, prog DutyCycle : 5, actual : 4.98
-PWM Channel : 1, prog Period (ms): 500.00, actual : 499996, prog DutyCycle : 10, actual : 10.00
-PWM Channel : 2, prog Period (ms): 333.33, actual : 333396, prog DutyCycle : 20, actual : 19.98
-PWM Channel : 3, prog Period (ms): 250.00, actual : 250196, prog DutyCycle : 25, actual : 24.94
-PWM Channel : 4, prog Period (ms): 200.00, actual : 200192, prog DutyCycle : 30, actual : 29.88
-PWM Channel : 5, prog Period (ms): 166.67, actual : 166792, prog DutyCycle : 35, actual : 34.90
-PWM Channel : 6, prog Period (ms): 142.86, actual : 142988, prog DutyCycle : 40, actual : 39.87
-PWM Channel : 7, prog Period (ms): 125.00, actual : 125196, prog DutyCycle : 45, actual : 44.89
-SimpleTimer (us): 2000, us : 22144772, Dus : 10074384
-PWM Channel : 0, prog Period (ms): 1000.00, actual : 1000000, prog DutyCycle : 5, actual : 5.00
-PWM Channel : 1, prog Period (ms): 500.00, actual : 499996, prog DutyCycle : 10, actual : 10.00
-PWM Channel : 2, prog Period (ms): 333.33, actual : 333396, prog DutyCycle : 20, actual : 19.98
-PWM Channel : 3, prog Period (ms): 250.00, actual : 250196, prog DutyCycle : 25, actual : 24.94
-PWM Channel : 4, prog Period (ms): 200.00, actual : 200196, prog DutyCycle : 30, actual : 29.87
-PWM Channel : 5, prog Period (ms): 166.67, actual : 166792, prog DutyCycle : 35, actual : 34.90
-PWM Channel : 6, prog Period (ms): 142.86, actual : 143016, prog DutyCycle : 40, actual : 39.87
-PWM Channel : 7, prog Period (ms): 125.00, actual : 125008, prog DutyCycle : 45, actual : 44.96
+Starting  ITimer1 OK, millis() = 5
+Starting  ITimer3 OK, millis() = 8
+Time = 10001, Timer1Count = 97, TimerCount = 49
+Time = 20002, Timer1Count = 195, TimerCount = 99
+Changing Interval, Timer1 = 200
+Changing Interval, Timer3 = 400
+Time = 30003, Timer1Count = 244, TimerCount = 123
+Time = 40004, Timer1Count = 294, TimerCount = 148
+Changing Interval, Timer1 = 100
+Changing Interval, Timer3 = 200
+Time = 50006, Timer1Count = 391, TimerCount = 197
+Time = 60007, Timer1Count = 489, TimerCount = 247
+Changing Interval, Timer1 = 200
+Changing Interval, Timer3 = 400
+Time = 70008, Timer1Count = 538, TimerCount = 271
+Time = 80009, Timer1Count = 588, TimerCount = 296
+
 ```
 
 ---
-
-### 3. ISR_8_PWMs_Array_Simple on Arduino AVR Nano
-
-The following is the sample terminal output when running example [**ISR_8_PWMs_Array_Simple**](examples/ISR_8_PWMs_Array_Simple) on **nRF52-based NRF52840_ITSYBITSY** to demonstrate how to use multiple PWM channels.
-
-```
-Starting ISR_8_PWMs_Array_Complex on Arduino AVR UNO, Nano, etc.
-AVR_Slow_PWM v1.0.0
-CPU Frequency = 16 MHz
-[PWM] T1
-[PWM] Freq * 1000 = 10000000.00
-[PWM] F_CPU = 16000000 , preScalerDiv = 1
-[PWM] OCR = 1599 , preScalerIndex = 1
-[PWM] OK in loop => _OCR = 1599
-[PWM] _preScalerIndex = 1 , preScalerDiv = 1
-[PWM] TCCR1B = 9
-Starting  ITimer1 OK, micros() = 2025876
-Channel : 0	Period : 1000000		OnTime : 50000	Start_Time : 2026740
-Channel : 1	Period : 500000		OnTime : 50000	Start_Time : 2026740
-Channel : 2	Period : 333333		OnTime : 66666	Start_Time : 2026740
-Channel : 3	Period : 250000		OnTime : 62500	Start_Time : 2026740
-Channel : 4	Period : 200000		OnTime : 60000	Start_Time : 2026740
-Channel : 5	Period : 166666		OnTime : 58333	Start_Time : 2026740
-Channel : 6	Period : 142857		OnTime : 57142	Start_Time : 2026740
-Channel : 7	Period : 125000		OnTime : 56250	Start_Time : 2026740
-SimpleTimer (us): 2000, us : 12072128, Dus : 10045452
-PWM Channel : 0, prog Period (ms): 1000.00, actual : 1000000, prog DutyCycle : 5, actual : 5.00
-PWM Channel : 1, prog Period (ms): 500.00, actual : 500012, prog DutyCycle : 10, actual : 10.00
-PWM Channel : 2, prog Period (ms): 333.33, actual : 333396, prog DutyCycle : 20, actual : 19.98
-PWM Channel : 3, prog Period (ms): 250.00, actual : 250024, prog DutyCycle : 25, actual : 24.95
-PWM Channel : 4, prog Period (ms): 200.00, actual : 200208, prog DutyCycle : 30, actual : 29.96
-PWM Channel : 5, prog Period (ms): 166.67, actual : 166792, prog DutyCycle : 35, actual : 34.90
-PWM Channel : 6, prog Period (ms): 142.86, actual : 142992, prog DutyCycle : 40, actual : 39.87
-PWM Channel : 7, prog Period (ms): 125.00, actual : 125192, prog DutyCycle : 45, actual : 44.89
-SimpleTimer (us): 2000, us : 22147164, Dus : 10075036
-PWM Channel : 0, prog Period (ms): 1000.00, actual : 1000000, prog DutyCycle : 5, actual : 5.00
-PWM Channel : 1, prog Period (ms): 500.00, actual : 500012, prog DutyCycle : 10, actual : 10.00
-PWM Channel : 2, prog Period (ms): 333.33, actual : 333396, prog DutyCycle : 20, actual : 19.98
-PWM Channel : 3, prog Period (ms): 250.00, actual : 250196, prog DutyCycle : 25, actual : 24.94
-PWM Channel : 4, prog Period (ms): 200.00, actual : 199996, prog DutyCycle : 30, actual : 30.00
-PWM Channel : 5, prog Period (ms): 166.67, actual : 166792, prog DutyCycle : 35, actual : 34.90
-PWM Channel : 6, prog Period (ms): 142.86, actual : 143012, prog DutyCycle : 40, actual : 39.87
-PWM Channel : 7, prog Period (ms): 125.00, actual : 125012, prog DutyCycle : 45, actual : 44.95
-```
-
-
 ---
----
+
 
 ### Debug
 
 Debug is enabled by default on Serial.
 
-You can also change the debugging level `_PWM_LOGLEVEL_` from 0 to 4
+You can also change the debugging level from 0 to 3
 
 ```cpp
-// Don't define _PWM_LOGLEVEL_ > 0. Only for special ISR debugging only. Can hang the system.
-#define _PWM_LOGLEVEL_     0
+// These define's must be placed at the beginning before #include "TimerInterrupt.h"
+// _TIMERINTERRUPT_LOGLEVEL_ from 0 to 4
+// Don't define _TIMERINTERRUPT_LOGLEVEL_ > 0. Only for special ISR debugging only. Can hang the system.
+#define TIMER_INTERRUPT_DEBUG         0
+#define _TIMERINTERRUPT_LOGLEVEL_     0
 ```
 
 ---
@@ -925,31 +1089,131 @@ Sometimes, the library will only work if you update the board core to the latest
 ---
 ---
 
+## Releases
+
+### Releases v1.5.0
+
+1. Add **Timer3 and Timer4 support to ATmega32U4 and ATmega16U4.** 
+2. Add Timer auto-selection to examples.
+
+### Releases v1.4.1
+
+1. Add support to **Generic or Sparkfun AVR ATmega_32U4** such as **AVR_MAKEYMAKEY, AVR_PROMICRO, etc.**
+2. Add support to **Generic or Sparkfun AVR ATmega_328(P)** such as **ARDUINO_REDBOT, ARDUINO_AVR_DIGITAL_SANDBOX, etc.**
+3. Add support to **Generic or Sparkfun AVR ATmega128RFA1** such as **ATMEGA128RFA1_DEV_BOARD, etc.**
+
+
+### Releases v1.4.0
+
+1. Add support to **Adafruit AVR ATMEGA_32U4** such as **AVR_FLORA8, AVR_FEATHER32U4, etc.**
+2. Add support to **Adafruit AVR ATMEGA_328(P)** such as **AVR_FEATHER328P, AVR_METRO, etc.**
+3. Update examples
+
+### Releases v1.3.0
+
+1. Add support to **AVR ATMEGA_16U4, ATMEGA_32U4** such as **Leonardo, YUN, ESPLORA, etc.**
+2. Update examples
+
+### Releases v1.2.0
+
+1. Add better debug feature.
+2. Optimize code and examples to reduce RAM usage
+
+### Releases v1.1.2
+
+1. Clean-up all compiler warnings possible.
+2. Optimize examples to reduce memory usage by using Flash String whenever possible.
+3. Add Table of Contents
+
+### Releases v1.1.1
+
+1. Add example [**Change_Interval**](examples/Change_Interval)
+2. Bump up version to sync with other TimerInterrupt Libraries. Modify Version String.
+3. Add new h-only code besides conventional h/cpp code
+
+### Release v1.0.3
+
+1. Add example [**ISR_16_Timers_Array_Complex**](examples/ISR_16_Timers_Array_Complex) and optimize example [**ISR_Timers_Array_Simple**](examples/ISR_Timers_Array_Simple) to demonstrate the usage of **16 ISR-based timers**
+
+### Release v1.0.2
+
+Now with these new **16 ISR-based timers**, the maximum interval is **practically unlimited** (limited only by unsigned long miliseconds)
+**The accuracy is nearly perfect** compared to software timers. The most important feature is they're ISR-based timers
+Therefore, their executions are **not blocked by bad-behaving functions / tasks**. This important feature is absolutely necessary for mission-critical tasks. 
+
+The [**ISR_Timer_Complex**](examples/ISR_Timer_Complex) example will demonstrate the nearly perfect accuracy compared to software timers by printing the actual elapsed millisecs of each type of timers.
+Being ISR-based timers, their executions are not blocked by bad-behaving functions / tasks, such as connecting to WiFi, Internet and Blynk services. You can also have many `(up to 16)` timers to use.
+
+This non-being-blocked important feature is absolutely necessary for mission-critical tasks.
+
+You'll see blynkTimer Software is blocked while system is connecting to WiFi / Internet / Blynk, as well as by blocking task 
+in loop(), using delay() function as an example. The elapsed time then is very unaccurate
+
+---
+
+### Currently supported Boards
+
+- Arduino Uno / Mega / Duemilanove / Diecimila / LilyPad / Mini / Fio / Nano, etc.
+- **Arduino ATMega 16U4, 32U4** such as AVR Leonardo, Leonardo ETH, YUN, Esplora, LILYPAD_USB, AVR_ROBOT_CONTROL, AVR_ROBOT_MOTOR, AVR_INDUSTRIAL101, etc.
+- **Adafruit ATMega 32U4** such as AVR_FLORA8, AVR_FEATHER32U4, AVR_CIRCUITPLAY, AVR_ITSYBITSY32U4_5V, AVR_ITSYBITSY32U4_3V, AVR_BLUEFRUITMICRO, AVR_ADAFRUIT32U4, etc.
+- **Adafruit ATMega 328(P)** such as AVR_METRO, AVR_FEATHER328P, AVR_PROTRINKET5, AVR_PROTRINKET3, AVR_PROTRINKET5FTDI, AVR_PROTRINKET3FTDI, etc.
+- **Generic or Sparkfun AVR ATmega_32U4** such as **AVR_MAKEYMAKEY, AVR_PROMICRO, etc.**
+- **Generic or Sparkfun AVR ATmega_328(P)** such as **ARDUINO_REDBOT, ARDUINO_AVR_DIGITAL_SANDBOX, etc.**
+- **Generic or Sparkfun AVR ATmega128RFA1** such as **ATMEGA128RFA1_DEV_BOARD, etc.**
+
+---
+---
+
 ### Issues
 
-Submit issues to: [AVR_Slow_PWM issues](https://github.com/khoih-prog/AVR_Slow_PWM/issues)
+Submit issues to: [TimerInterrupt issues](https://github.com/khoih-prog/TimerInterrupt/issues)
 
 ---
+---
 
-## TO DO
+### TO DO
 
 1. Search for bug and improvement.
-2. Similar features for remaining Arduino boards
 
----
 
-## DONE
+### DONE
 
-1. Basic hardware multi-channel PWM for **AVR boards, such as Mega-2560, UNO,Nano, Leonardo, etc.** using AVR core
-2. Add Table of Contents
+ 1. Longer Interval for timers.
+ 2. Reduce code size if use less timers. Eliminate compiler warnings.
+ 3. Now supporting complex object pointer-type argument.
+ 3. 16 hardware-initiated software-enabled timers while using only 1 hardware timer.
+ 4. Fix some bugs in v1.0.0
+ 5. Add more examples.
+ 6. Similar library for ESP32, ESP8266, SAMD21/SAMD51, nRF52, Mbed-OS Nano-33-BLE, STM32
+ 7. Add support to **Arduino ATMega-16U4, ATMega-32U4**-based boards
+ 8. Add support to **Adafruit ATMega-32U4**-based boards
+ 9. Add support to **Adafruit ATMega-328(P)**-based boards
+10. Add support to **Generic or Sparkfun AVR ATmega_32U4** such as **AVR_MAKEYMAKEY, AVR_PROMICRO, etc.**
+11. Add support to **Generic or Sparkfun AVR ATmega_328(P)** such as **ARDUINO_REDBOT, ARDUINO_AVR_DIGITAL_SANDBOX, etc.**
+12. Add support to **Generic or Sparkfun AVR ATmega128RFA1** such as **ATMEGA128RFA1_DEV_BOARD, etc.**
+13. Add Timer3 and Timer4 support to **ATmega32U4 and ATmega16U4**.
 
 ---
 ---
 
 ### Contributions and Thanks
 
-Many thanks for everyone for bug reporting, new feature suggesting, testing and contributing to the development of this library.
+Many thanks for everyone for bug reporting, new feature suggesting, testing and contributing to the development of this library. Especially to these people who have directly or indirectly contributed to this [TimerInterrupt library](https://github.com/khoih-prog/TimerInterrupt)
 
+1. Thanks to [Django0](https://github.com/Django0) to provide the following PR [Fixed warnings from cppcheck (platformio) and -Wall arduino-cli. PR#10](https://github.com/khoih-prog/TimerInterrupt/pull/10).
+2. Thanks to [eslavko](https://github.com/eslavko) to report the issue [Error compiling for arduino leonardo #13](https://github.com/khoih-prog/TimerInterrupt/issues/13) leading to new release v1.3.0 to provide support to **Arduino ATMega-16U4, ATMega-32U4**-based boards, such as AVR Leonardo, Leonardo ETH, YUN, Esplora, LILYPAD_USB, AVR_ROBOT_CONTROL, AVR_ROBOT_MOTOR, AVR_INDUSTRIAL101, etc..
+3. Thanks to [bzuidgeest](https://github.com/bzuidgeest) to report the issue [Adafruit feather 32u4 #17](https://github.com/khoih-prog/TimerInterrupt/issues/17) leading to new release v1.4.0 to provide support to Adafruit **ATMega-32U4**-based boards, such as AVR_FLORA8, AVR_FEATHER32U4, AVR_CIRCUITPLAY, AVR_ITSYBITSY32U4_5V, AVR_ITSYBITSY32U4_3V, AVR_BLUEFRUITMICRO, AVR_ADAFRUIT32U4, etc. and **Adafruit ATMega-328(P)**-based boards, such as AVR_METRO, AVR_FEATHER328P, AVR_PROTRINKET5, AVR_PROTRINKET3, AVR_PROTRINKET5FTDI, AVR_PROTRINKET3FTDI, etc.
+4. Thanks to [joonghochoe](https://github.com/joonghochoe) to report the issue [Timer3/4 in Arduino Micro board #18](https://github.com/khoih-prog/TimerInterrupt/issues/18) leading to new release v1.5.0 to provide Timer3 and 4 support to ATmega32U4 and ATmega16U4.
+
+
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/Django0"><img src="https://github.com/Django0.png" width="100px;" alt="Django0"/><br /><sub><b>Django0</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/eslavko"><img src="https://github.com/eslavko.png" width="100px;" alt="eslavko"/><br /><sub><b>eslavko</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/bzuidgeest"><img src="https://github.com/bzuidgeest.png" width="100px;" alt="bzuidgeest"/><br /><sub><b>bzuidgeest</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/joonghochoe"><img src="https://github.com/joonghochoe.png" width="100px;" alt="joonghochoe"/><br /><sub><b>joonghochoe</b></sub></a><br /></td>
+  </tr> 
+</table>
 
 ---
 
@@ -963,14 +1227,14 @@ If you want to contribute to this project:
 
 ---
 
-### License
+## License
 
-- The library is licensed under [MIT](https://github.com/khoih-prog/AVR_Slow_PWM/blob/main/LICENSE)
+- The library is licensed under [MIT](https://github.com/khoih-prog/TimerInterrupt/blob/master/LICENSE)
 
 ---
 
 ## Copyright
 
-Copyright 2021- Khoi Hoang
+Copyright 2019- Khoi Hoang
 
 

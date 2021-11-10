@@ -33,14 +33,18 @@
   * [1. Init Hardware Timer](#1-init-hardware-timer)
   * [2. Set PWM Frequency, dutycycle, attach irqCallbackStartFunc and irqCallbackStopFunc functions](#2-Set-PWM-Frequency-dutycycle-attach-irqCallbackStartFunc-and-irqCallbackStopFunc-functions)
 * [Examples](#examples)
-  * [  1. ISR_8_PWMs_Array](examples/ISR_8_PWMs_Array)
-  * [  2. ISR_8_PWMs_Array_Complex](examples/ISR_8_PWMs_Array_Complex)
-  * [  3. ISR_8_PWMs_Array_Simple](examples/ISR_8_PWMs_Array_Simple)
+  * [ 1. ISR_8_PWMs_Array](examples/ISR_8_PWMs_Array)
+  * [ 2. ISR_8_PWMs_Array_Complex](examples/ISR_8_PWMs_Array_Complex)
+  * [ 3. ISR_8_PWMs_Array_Simple](examples/ISR_8_PWMs_Array_Simple)
+  * [ 4. ISR_Changing_PWM](examples/ISR_Changing_PWM)
+  * [ 5. ISR_Modify_PWM](examples/ISR_Modify_PWM)
 * [Example ISR_8_PWMs_Array_Complex](#Example-ISR_8_PWMs_Array_Complex)
 * [Debug Terminal Output Samples](#debug-terminal-output-samples)
   * [1. ISR_8_PWMs_Array_Complex on Arduino AVR Leonardo ATMega32U4](#1-ISR_8_PWMs_Array_Complex-on-Arduino-AVR-Leonardo-ATMega32U4)
   * [2. ISR_8_PWMs_Array on Arduino AVR Mega2560/ADK](#2-isr_8_pwms_array-on-avr-mega2560adk)
   * [3. ISR_8_PWMs_Array_Simple on Arduino AVR Nano](#3-ISR_8_PWMs_Array_Simple-on-Arduino-AVR-Nano)
+  * [4. ISR_Modify_PWM on Arduino AVR Mega2560/ADK](#4-ISR_Modify_PWM-on-avr-mega2560adk)
+  * [5. ISR_Changing_PWM on Arduino AVR Mega2560/ADK](#5-ISR_Changing_PWM-on-avr-mega2560adk)
 * [Debug](#debug)
 * [Troubleshooting](#troubleshooting)
 * [Issues](#issues)
@@ -58,7 +62,7 @@
 
 ### Features
 
-This library enables you to use ISR-based PWM channels on AVR-based boards, such as Mega-2560, UNO,Nano, Leonardo, etc., using AVR core to create and output PWM any GPIO pin. Because this library doesn't use the powerful purely hardware-controlled PWM with many limitations, the maximum PWM frequency is currently limited at **500Hz**, which is still suitable for many real-life applications.
+This library enables you to use ISR-based PWM channels on AVR-based boards, such as Mega-2560, UNO,Nano, Leonardo, etc., using AVR core to create and output PWM any GPIO pin. Because this library doesn't use the powerful purely hardware-controlled PWM with many limitations, the maximum PWM frequency is currently limited at **500Hz**, which is still suitable for many real-life applications. Now you can also modify PWM settings on-the-fly.
 
 ---
 
@@ -103,7 +107,7 @@ The catch is **your function is now part of an ISR (Interrupt Service Routine), 
 
 ### Currently supported Boards
 
-1. **AVR-based boards** such as **Mega-2560, UNO,Nano, Leonardo**, etc., using AVR core
+1. **AVR-based boards** using ATMEGA_328P, ATMEGA_2560, ATMEGA_1280, ATMEGA_640, ATMEGA_16U4, ATMEGA_32U4, etc. boards such as **Mega-2560, UNO, Nano, Leonardo**, etc., using **Arduino, Adafruit or Sparkfun AVR core**
 
 ---
 
@@ -120,7 +124,7 @@ The catch is **your function is now part of an ISR (Interrupt Service Routine), 
 
  1. [`Arduino IDE 1.8.16+` for Arduino](https://www.arduino.cc/en/Main/Software)
  2. [`Arduino AVR core 1.8.3+`](https://github.com/arduino/ArduinoCore-avr) for Arduino AVR boards. Use Arduino Board Manager to install. [![Latest release](https://img.shields.io/github/release/arduino/ArduinoCore-avr.svg)](https://github.com/arduino/ArduinoCore-avr/releases/latest/)
- 3. [`Adafruit AVR core 1.4.13+`](https://github.com/adafruit/Adafruit_Arduino_Boards) for Adafruit AVR boards. Use Arduino Board Manager to install. 
+ 3. [`Adafruit AVR core 1.4.14+`](https://github.com/adafruit/Adafruit_Arduino_Boards) for Adafruit AVR boards. Use Arduino Board Manager to install. 
  4. [`Sparkfun AVR core 1.1.13+`](https://github.com/sparkfun/Arduino_Boards) for Sparkfun AVR boards. Use Arduino Board Manager to install. 
  
  5. To use with certain example
@@ -270,7 +274,9 @@ void setup()
 
  1. [ISR_8_PWMs_Array](examples/ISR_8_PWMs_Array)
  2. [ISR_8_PWMs_Array_Complex](examples/ISR_8_PWMs_Array_Complex)
- 3. [ISR_8_PWMs_Array_Simple](examples/ISR_8_PWMs_Array_Simple) 
+ 3. [ISR_8_PWMs_Array_Simple](examples/ISR_8_PWMs_Array_Simple)
+ 4. [ISR_Changing_PWM](examples/ISR_Changing_PWM)
+ 5. [ISR_Modify_PWM](examples/ISR_Modify_PWM)
 
  
 ---
@@ -405,11 +411,10 @@ uint32_t PWM_Period[NUMBER_ISR_PWMS] =
   1000L,   500L,   333L,   250L,   200L,   166L,   142L,   125L
 };
 
-
 // You can assign any interval for any timer here, in Hz
-uint32_t PWM_Freq[NUMBER_ISR_PWMS] =
+double PWM_Freq[NUMBER_ISR_PWMS] =
 {
-  1,  2,  3,  4,  5,  6,  7,  8
+  1.0f,  2.0f,  3.0f,  4.0f,  5.0f,  6.0f,  7.0f,  8.0f,
 };
 
 // You can assign any interval for any timer here, in Microseconds
@@ -770,7 +775,7 @@ The following is the sample terminal output when running example [ISR_8_PWMs_Arr
 
 ```
 Starting ISR_8_PWMs_Array_Complex on Arduino AVR ATMega32U4
-AVR_Slow_PWM v1.0.0
+AVR_Slow_PWM v1.1.0
 CPU Frequency = 16 MHz
 [PWM] T3
 [PWM] Freq * 1000 = 10000000.00
@@ -815,7 +820,7 @@ The following is the sample terminal output when running example [**ISR_8_PWMs_A
 
 ```
 Starting ISR_8_PWMs_Array_Complex on Arduino AVR Mega2560/ADK
-AVR_Slow_PWM v1.0.0
+AVR_Slow_PWM v1.1.0
 CPU Frequency = 16 MHz
 [PWM] T3
 [PWM] Freq * 1000 = 10000000.00
@@ -856,11 +861,11 @@ PWM Channel : 7, prog Period (ms): 125.00, actual : 125008, prog DutyCycle : 45,
 
 ### 3. ISR_8_PWMs_Array_Simple on Arduino AVR Nano
 
-The following is the sample terminal output when running example [**ISR_8_PWMs_Array_Simple**](examples/ISR_8_PWMs_Array_Simple) on **nRF52-based NRF52840_ITSYBITSY** to demonstrate how to use multiple PWM channels.
+The following is the sample terminal output when running example [**ISR_8_PWMs_Array_Simple**](examples/ISR_8_PWMs_Array_Simple) on **Arduino AVR UNO** to demonstrate how to use multiple PWM channels.
 
 ```
 Starting ISR_8_PWMs_Array_Complex on Arduino AVR UNO, Nano, etc.
-AVR_Slow_PWM v1.0.0
+AVR_Slow_PWM v1.1.0
 CPU Frequency = 16 MHz
 [PWM] T1
 [PWM] Freq * 1000 = 10000000.00
@@ -898,6 +903,56 @@ PWM Channel : 6, prog Period (ms): 142.86, actual : 143012, prog DutyCycle : 40,
 PWM Channel : 7, prog Period (ms): 125.00, actual : 125012, prog DutyCycle : 45, actual : 44.95
 ```
 
+---
+
+### 4. ISR_Modify_PWM on AVR Mega2560/ADK
+
+The following is the sample terminal output when running example [ISR_Modify_PWM](examples/ISR_Modify_PWM) on **AVR Mega2560/ADK** to demonstrate how to modify PWM settings on-the-fly without deleting the PWM channel
+
+```
+Starting ISR_Modify_PWM on Arduino AVR Mega2560/ADK
+AVR_Slow_PWM v1.1.0
+CPU Frequency = 16 MHz
+[PWM] T3
+[PWM] Freq * 1000 = 10000000.00
+[PWM] F_CPU = 16000000 , preScalerDiv = 1
+[PWM] OCR = 1599 , preScalerIndex = 1
+[PWM] OK in loop => _OCR = 1599
+[PWM] _preScalerIndex = 1 , preScalerDiv = 1
+Starting  ITimer3 OK, micros() = 2023160
+Using PWM Freq = 1.00, PWM DutyCycle = 10
+Channel : 0	Period : 1000000		OnTime : 100000	Start_Time : 2028040
+Channel : 0	Period : 500000		OnTime : 450000	Start_Time : 12033220
+Channel : 0	Period : 1000000		OnTime : 100000	Start_Time : 22034628
+Channel : 0	Period : 500000		OnTime : 450000	Start_Time : 32036036
+```
+
+---
+
+### 5. ISR_Changing_PWM on AVR Mega2560/ADK
+
+The following is the sample terminal output when running example [ISR_Changing_PWM](examples/ISR_Changing_PWM) on **AVR Mega2560/ADK** to demonstrate how to modify PWM settings on-the-fly by deleting the PWM channel and reinit the PWM channel
+
+```
+Starting ISR_Changing_PWM on Arduino AVR Mega2560/ADK
+AVR_Slow_PWM v1.1.0
+CPU Frequency = 16 MHz
+[PWM] T3
+[PWM] Freq * 1000 = 10000000.00
+[PWM] F_CPU = 16000000 , preScalerDiv = 1
+[PWM] OCR = 1599 , preScalerIndex = 1
+[PWM] OK in loop => _OCR = 1599
+[PWM] _preScalerIndex = 1 , preScalerDiv = 1
+Starting  ITimer3 OK, micros() = 2023336
+Using PWM Freq = 1.00, PWM DutyCycle = 50
+Channel : 0	Period : 1000000		OnTime : 500000	Start_Time : 2028216
+Using PWM Freq = 2.00, PWM DutyCycle = 90
+Channel : 0	Period : 500000		OnTime : 450000	Start_Time : 12035408
+Using PWM Freq = 1.00, PWM DutyCycle = 50
+Channel : 0	Period : 1000000		OnTime : 500000	Start_Time : 22040404
+Using PWM Freq = 2.00, PWM DutyCycle = 90
+Channel : 0	Period : 500000		OnTime : 450000	Start_Time : 32045592
+```
 
 ---
 ---
@@ -942,6 +997,7 @@ Submit issues to: [AVR_Slow_PWM issues](https://github.com/khoih-prog/AVR_Slow_P
 
 1. Basic hardware multi-channel PWM for **AVR boards, such as Mega-2560, UNO,Nano, Leonardo, etc.** using AVR core
 2. Add Table of Contents
+3. Add functions to modify PWM settings on-the-fly
 
 ---
 ---

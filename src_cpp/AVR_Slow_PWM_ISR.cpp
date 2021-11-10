@@ -18,16 +18,17 @@
   Therefore, their executions are not blocked by bad-behaving functions / tasks.
   This important feature is absolutely necessary for mission-critical tasks.
 
-  Version: 1.0.0
+  Version: 1.1.0
 
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.0.0   K.Hoang      27/09/2021 Initial coding for AVR-based boards  (UNO, Nano, Mega, 32U4, 16U4, etc. )
+  1.1.0   K Hoang      10/11/2021 Add functions to modify PWM settings on-the-fly
 *****************************************************************************************************************************/
 
-#include <string.h>
-
 #include "AVR_Slow_PWM_ISR.h"
+
+#include <string.h>
 
 /////////////////////////////////////////////////// 
 
@@ -176,6 +177,8 @@ int AVR_Slow_PWM_ISR::setupPWMChannel(uint32_t pin, uint32_t period, uint32_t du
   digitalWrite(pin, HIGH);
   PWM[channelNum].pinHigh       = true;
   
+  PWM[channelNum].prevTime      = timeNow();
+  
   PWM[channelNum].callbackStart = cbStartFunc;
   PWM[channelNum].callbackStop  = cbStopFunc;
   
@@ -190,6 +193,44 @@ int AVR_Slow_PWM_ISR::setupPWMChannel(uint32_t pin, uint32_t period, uint32_t du
   
   return channelNum;
 }
+
+///////////////////////////////////////////////////
+
+bool AVR_Slow_PWM_ISR::modifyPWMChannel_Period(unsigned channelNum, uint32_t pin, uint32_t period, uint32_t dutycycle)
+{
+  // Invalid input, such as period = 0, etc
+  if ( (period == 0) || (dutycycle > 100) )
+  {
+    PWM_LOGERROR("Error: Invalid period or dutycycle");
+    return false;
+  }
+
+  if (channelNum > MAX_NUMBER_CHANNELS) 
+  {
+    PWM_LOGERROR("Error: channelNum > MAX_NUMBER_CHANNELS");
+    return false;
+  }
+  
+  if (PWM[channelNum].pin != pin) 
+  {
+    PWM_LOGERROR("Error: channelNum and pin mismatched");
+    return false;
+  }
+   
+  PWM[channelNum].period        = period;
+  PWM[channelNum].onTime        = ( period * dutycycle ) / 100;
+  
+  digitalWrite(pin, HIGH);
+  PWM[channelNum].pinHigh       = true;
+  
+  PWM[channelNum].prevTime      = timeNow();
+     
+  PWM_LOGINFO0("Channel : "); PWM_LOGINFO0(channelNum); PWM_LOGINFO0("\tPeriod : "); PWM_LOGINFO0(PWM[channelNum].period);
+  PWM_LOGINFO0("\t\tOnTime : "); PWM_LOGINFO0(PWM[channelNum].onTime); PWM_LOGINFO0("\tStart_Time : "); PWM_LOGINFOLN0(PWM[channelNum].prevTime);
+  
+  return true;
+}
+
 
 ///////////////////////////////////////////////////
 

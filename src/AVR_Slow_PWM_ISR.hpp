@@ -31,332 +31,273 @@
 #ifndef AVR_SLOW_PWM_ISR_HPP
 #define AVR_SLOW_PWM_ISR_HPP
 
-#include <string.h>
+#if defined(BOARD_NAME)
+  #undef BOARD_NAME
+#endif
 
-/////////////////////////////////////////////////// 
-
-
-uint32_t timeNow()
-{
-#if USING_MICROS_RESOLUTION  
-  return ( (uint32_t) micros() );
-#else
-  return ( (uint32_t) millis() );
-#endif    
-}
- 
-/////////////////////////////////////////////////// 
-
-AVR_Slow_PWM_ISR::AVR_Slow_PWM_ISR()
-  : numChannels (-1)
-{
-}
-
-///////////////////////////////////////////////////
-
-void AVR_Slow_PWM_ISR::init() 
-{
-  uint32_t currentTime = timeNow();
-   
-  for (uint8_t channelNum = 0; channelNum < MAX_NUMBER_CHANNELS; channelNum++) 
-  {
-    memset((void*) &PWM[channelNum], 0, sizeof (PWM_t));
-    PWM[channelNum].prevTime = currentTime;
-    PWM[channelNum].pin      = INVALID_AVR_PIN;
-  }
+#if ( defined(__AVR_ATmega2560__) || defined(__AVR_ATmega2561__) || defined(__AVR_ATmega1280__) || defined(__AVR_ATmega1281__) || \
+      defined(__AVR_ATmega640__) || defined(__AVR_ATmega641__))
+  #if defined(TIMER_INTERRUPT_USING_ATMEGA2560)
+    #undef TIMER_INTERRUPT_USING_ATMEGA2560
+  #endif
+  #define TIMER_INTERRUPT_USING_ATMEGA2560      true   
+  #define BOARD_NAME    F("Arduino AVR Mega2560/ADK")
+  #warning Using Arduino AVR Mega, Mega640(P), Mega2560/ADK. Timer1-5 available
   
-  numChannels = 0;
-}
+#elif ( defined(__AVR_ATmega644__) || defined(__AVR_ATmega644A__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644PA__)  || \
+        defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO) || defined(ARDUINO_AVR_MINI) ||    defined(ARDUINO_AVR_ETHERNET) || \
+        defined(ARDUINO_AVR_FIO) || defined(ARDUINO_AVR_BT)   || defined(ARDUINO_AVR_LILYPAD) || defined(ARDUINO_AVR_PRO)      || \
+        defined(ARDUINO_AVR_NG) || defined(ARDUINO_AVR_UNO_WIFI_DEV_ED) || defined(ARDUINO_AVR_DUEMILANOVE) )      
+  #define BOARD_NAME    "Arduino AVR UNO, Nano, etc." 
+  #warning Using Aduino AVR ATMega644(P), ATMega328(P) such as UNO, Nano. Only Timer1,2 available
 
-///////////////////////////////////////////////////
-
-void AVR_Slow_PWM_ISR::run() 
-{    
-  //uint32_t currentTime = timeNow();
-  uint32_t currentTime;
-
-  for (uint8_t channelNum = 0; channelNum < MAX_NUMBER_CHANNELS; channelNum++) 
-  {
-    currentTime = timeNow();
-    
-    // If enabled => check
-    // start period / dutyCycle => digitalWrite HIGH
-    // end dutyCycle =>  digitalWrite LOW
-    if (PWM[channelNum].enabled) 
-    {
-      if ( (uint32_t) (currentTime - PWM[channelNum].prevTime) <= PWM[channelNum].onTime ) 
-      {              
-        if (!PWM[channelNum].pinHigh)
-        {
-          digitalWrite(PWM[channelNum].pin, HIGH);
-          PWM[channelNum].pinHigh = true;
-          
-          // callbackStart
-          if (PWM[channelNum].callbackStart != nullptr)
-          {
-            (*(timer_callback) PWM[channelNum].callbackStart)();
-          }
-        }
-      }
-      else if ( (uint32_t) (currentTime - PWM[channelNum].prevTime) < PWM[channelNum].period ) 
-      {
-        if (PWM[channelNum].pinHigh)
-        {
-          digitalWrite(PWM[channelNum].pin, LOW);
-          PWM[channelNum].pinHigh = false;
-          
-          // callback when PWM pulse stops (LOW)
-          if (PWM[channelNum].callbackStop != nullptr)
-          {
-            (*(timer_callback) PWM[channelNum].callbackStop)();
-          }
-        }
-      }
-      else 
-      //else if ( (uint32_t) (currentTime - PWM[channelNum].prevTime) >= PWM[channelNum].period )   
-      {
-        PWM[channelNum].prevTime = currentTime;
-      }      
-    }
-  }
-}
-
-
-///////////////////////////////////////////////////
-
-// find the first available slot
-// return -1 if none found
-int AVR_Slow_PWM_ISR::findFirstFreeSlot() 
-{
-  // all slots are used
-  if (numChannels >= MAX_NUMBER_CHANNELS) 
-  {
-    return -1;
-  }
-
-  // return the first slot with no callbackStart (i.e. free)
-  for (uint8_t channelNum = 0; channelNum < MAX_NUMBER_CHANNELS; channelNum++) 
-  {
-    if ( (PWM[channelNum].period == 0) && !PWM[channelNum].enabled )
-    {
-      return channelNum;
-    }
-  }
-
-  // no free slots found
-  return -1;
-}
-
-///////////////////////////////////////////////////
-
-int AVR_Slow_PWM_ISR::setupPWMChannel(uint32_t pin, uint32_t period, uint32_t dutycycle, void* cbStartFunc, void* cbStopFunc)
-{
-  int channelNum;
+#elif ( defined(ARDUINO_AVR_FEATHER328P) || defined(ARDUINO_AVR_METRO) || defined(ARDUINO_AVR_PROTRINKET5) || defined(ARDUINO_AVR_PROTRINKET3) || \
+      defined(ARDUINO_AVR_PROTRINKET5FTDI) || defined(ARDUINO_AVR_PROTRINKET3FTDI) )
+  #define BOARD_NAME    F("Adafruit AVR ATMega328(P)")
+  #warning Using Adafruit ATMega328(P), such as AVR_FEATHER328P or AVR_METRO. Only Timer1,2 available
+        
+#elif ( defined(ARDUINO_AVR_LEONARDO) || defined(ARDUINO_AVR_LEONARDO_ETH) || defined(ARDUINO_AVR_YUN) || defined(ARDUINO_AVR_MICRO) || \
+        defined(ARDUINO_AVR_ESPLORA)  || defined(ARDUINO_AVR_LILYPAD_USB)  || defined(ARDUINO_AVR_ROBOT_CONTROL) || defined(ARDUINO_AVR_ROBOT_MOTOR) || \
+        defined(ARDUINO_AVR_CIRCUITPLAY)  || defined(ARDUINO_AVR_YUNMINI) || defined(ARDUINO_AVR_INDUSTRIAL101) || defined(ARDUINO_AVR_LININO_ONE) )
+  #if defined(TIMER_INTERRUPT_USING_ATMEGA_32U4)
+    #undef TIMER_INTERRUPT_USING_ATMEGA_32U4
+  #endif
+  #define TIMER_INTERRUPT_USING_ATMEGA_32U4      true
+  #define BOARD_NAME    F("Arduino AVR ATMega32U4")
+  #warning Using Arduino ATMega32U4, such as Leonardo or Leonardo ETH. Only Timer1,3,4 available
   
-  // Invalid input, such as period = 0, etc
-  if ( (period == 0) || (dutycycle > 100) )
-  {
-    PWM_LOGERROR(F("Error: Invalid period or dutycycle"));
-    return -1;
-  }
+#elif ( defined(ARDUINO_AVR_FLORA8 ) || defined(ARDUINO_AVR_FEATHER32U4) || defined(ARDUINO_AVR_CIRCUITPLAY) || defined(ARDUINO_AVR_ITSYBITSY32U4_5V) || \
+        defined(ARDUINO_AVR_ITSYBITSY32U4_3V)  || defined(ARDUINO_AVR_BLUEFRUITMICRO) || defined(ARDUINO_AVR_ADAFRUIT32U4) )
+  #if defined(TIMER_INTERRUPT_USING_ATMEGA_32U4)
+    #undef TIMER_INTERRUPT_USING_ATMEGA_32U4
+  #endif
+  #define TIMER_INTERRUPT_USING_ATMEGA_32U4      true
+  #define BOARD_NAME    F("Adafruit AVR ATMega32U4")
+  #warning Using Adafruit ATMega32U4, such as Feather_32u4, AVR_CIRCUITPLAY, etc.. Only Timer1,3,4 available
 
-  if (numChannels < 0) 
-  {
-    init();
-  }
- 
-  channelNum = findFirstFreeSlot();
-  
-  if (channelNum < 0) 
-  {
-    return -1;
-  }
+#elif ( defined(__AVR_ATmega32U4__) || defined(ARDUINO_AVR_MAKEYMAKEY ) || defined(ARDUINO_AVR_PROMICRO) || defined(ARDUINO_AVR_FIOV3) || \
+        defined(ARDUINO_AVR_QDUINOMINI) || defined(ARDUINO_AVR_LILYPAD_ARDUINO_USB_PLUS_BOARD ) )
+  #if defined(TIMER_INTERRUPT_USING_ATMEGA_32U4)
+    #undef TIMER_INTERRUPT_USING_ATMEGA_32U4
+  #endif
+  #define TIMER_INTERRUPT_USING_ATMEGA_32U4      true
+  #define BOARD_NAME    F("Generic or Sparkfun AVR ATMega32U4")
+  #warning Using Generic ATMega32U4, such as Sparkfun AVR_MAKEYMAKEY, AVR_PROMICRO, etc. Only Timer1,3,4 available
 
-  PWM[channelNum].pin           = pin;
-  PWM[channelNum].period        = period;
-  PWM[channelNum].onTime        = ( period * dutycycle ) / 100;
-  
-  pinMode(pin, OUTPUT);
-  digitalWrite(pin, HIGH);
-  PWM[channelNum].pinHigh       = true;
-  
-  PWM[channelNum].prevTime      = timeNow();
-  
-  PWM[channelNum].callbackStart = cbStartFunc;
-  PWM[channelNum].callbackStop  = cbStopFunc;
-  
-  PWM_LOGINFO0(F("Channel : ")); PWM_LOGINFO0(channelNum); 
-  PWM_LOGINFO0(F("\tPeriod : ")); PWM_LOGINFO0(PWM[channelNum].period);
-  PWM_LOGINFO0(F("\t\tOnTime : ")); PWM_LOGINFO0(PWM[channelNum].onTime);
-  PWM_LOGINFO0(F("\tStart_Time : ")); PWM_LOGINFOLN0(PWM[channelNum].prevTime);
- 
-  numChannels++;
-  
-  PWM[channelNum].enabled      = true;
-  
-  return channelNum;
-}
+#elif ( defined(__AVR_ATmega328P__) || defined(ARDUINO_AVR_DIGITAL_SANDBOX ) || defined(ARDUINO_REDBOT) || defined(ARDUINO_AVR_SERIAL_7_SEGMENT) )
+  #define BOARD_NAME    F("Generic or Sparkfun AVR ATMega328P")
+  #warning Using Generic ATMega328P, such as Sparkfun AVR_DIGITAL_SANDBOX, REDBOT, etc.
 
-///////////////////////////////////////////////////
-
-bool AVR_Slow_PWM_ISR::modifyPWMChannel_Period(unsigned channelNum, uint32_t pin, uint32_t period, uint32_t dutycycle)
-{
-  // Invalid input, such as period = 0, etc
-  if ( (period == 0) || (dutycycle > 100) )
-  {
-    PWM_LOGERROR("Error: Invalid period or dutycycle");
-    return false;
-  }
-
-  if (channelNum > MAX_NUMBER_CHANNELS) 
-  {
-    PWM_LOGERROR("Error: channelNum > MAX_NUMBER_CHANNELS");
-    return false;
-  }
+#elif ( defined(__AVR_ATmega128RFA1__) || defined(ARDUINO_ATMEGA128RFA1_DEV_BOARD) )
+  #define BOARD_NAME    F("Generic or Sparkfun AVR ATMega128RFA1")
+  #warning Using Generic ATMega128RFA1, such as Sparkfun ATMEGA128RFA1_DEV_BOARD, etc.
   
-  if (PWM[channelNum].pin != pin) 
-  {
-    PWM_LOGERROR("Error: channelNum and pin mismatched");
-    return false;
-  }
-   
-  PWM[channelNum].period        = period;
-  PWM[channelNum].onTime        = ( period * dutycycle ) / 100;
-  
-  digitalWrite(pin, HIGH);
-  PWM[channelNum].pinHigh       = true;
-  
-  PWM[channelNum].prevTime      = timeNow();
+#elif ( defined(ARDUINO_AVR_GEMMA) || defined(ARDUINO_AVR_TRINKET3) || defined(ARDUINO_AVR_TRINKET5) )
+  #error These AVR boards are not supported! Please check your Tools->Board setting.
      
-  PWM_LOGINFO0("Channel : "); PWM_LOGINFO0(channelNum); PWM_LOGINFO0("\tPeriod : "); PWM_LOGINFO0(PWM[channelNum].period);
-  PWM_LOGINFO0("\t\tOnTime : "); PWM_LOGINFO0(PWM[channelNum].onTime); PWM_LOGINFO0("\tStart_Time : "); PWM_LOGINFOLN0(PWM[channelNum].prevTime);
+#else
+  #error This is designed only for Arduino or Adafruit AVR board! Please check your Tools->Board setting.
+#endif
+
+#ifndef AVR_SLOW_PWM_VERSION
+  #define AVR_SLOW_PWM_VERSION           F("AVR_Slow_PWM v1.2.0")
   
-  return true;
-}
+  #define AVR_SLOW_PWM_VERSION_MAJOR     1
+  #define AVR_SLOW_PWM_VERSION_MINOR     2
+  #define AVR_SLOW_PWM_VERSION_PATCH     0
 
+  #define AVR_SLOW_PWM_VERSION_INT      1002000
+#endif
 
-///////////////////////////////////////////////////
+#ifndef _PWM_LOGLEVEL_
+  #define _PWM_LOGLEVEL_        1
+#endif
 
-void AVR_Slow_PWM_ISR::deleteChannel(unsigned channelNum) 
+#include "PWM_Generic_Debug.h"
+
+#include <stddef.h>
+
+#include <inttypes.h>
+
+#if defined(ARDUINO)
+  #if ARDUINO >= 100
+    #include <Arduino.h>
+  #else
+    #include <WProgram.h>
+  #endif
+#endif
+
+#define AVR_Slow_PWM_ISR  AVR_Slow_PWM
+
+typedef void (*timer_callback)();
+typedef void (*timer_callback_p)(void *);
+
+#if !defined(USING_MICROS_RESOLUTION)
+  #warning Not USING_MICROS_RESOLUTION, using millis resolution
+  #define USING_MICROS_RESOLUTION       false
+#endif
+
+#define INVALID_AVR_PIN         255
+
+//////////////////////////////////////////////////////////////////
+
+class AVR_Slow_PWM_ISR 
 {
-  if (channelNum >= MAX_NUMBER_CHANNELS) 
-  {
-    return;
-  }
 
-  // nothing to delete if no timers are in use
-  if (numChannels == 0) 
-  {
-    return;
-  }
+  public:
+    // maximum number of PWM channels
+#define MAX_NUMBER_CHANNELS        16
 
-  // don't decrease the number of timers if the specified slot is already empty (zero period, invalid)
-  if ( (PWM[channelNum].pin != INVALID_AVR_PIN) && (PWM[channelNum].period != 0) )
-  {
-    memset((void*) &PWM[channelNum], 0, sizeof (PWM_t));
+    // constructor
+    AVR_Slow_PWM_ISR();
+
+    void init();
+
+    // this function must be called inside loop()
+    void run();
     
-    PWM[channelNum].pin = INVALID_AVR_PIN;
+    //////////////////////////////////////////////////////////////////
+    // PWM
+    // Return the channelNum if OK, -1 if error
+    int8_t setPWM(const uint32_t& pin, const double& frequency, const double& dutycycle, timer_callback StartCallback = nullptr, 
+                timer_callback StopCallback = nullptr)
+    {
+      double period = 0;
+      
+     if ( ( frequency != 0 ) && ( frequency <= 1000 ) )
+      {
+#if USING_MICROS_RESOLUTION
+      // period in us
+      period = 1000000.0f / frequency;
+#else    
+      // period in ms
+      period = 1000.0f / frequency;
+#endif
+      }
+      else
+      {       
+        PWM_LOGERROR("Error: Invalid frequency, max is 1000Hz");
+        
+        return -1;
+      }
+      
+      return setupPWMChannel(pin, period, dutycycle, (void *) StartCallback, (void *) StopCallback);   
+    }
+
+    // period in us
+    // Return the channelNum if OK, -1 if error
+    int8_t setPWM_Period(const uint32_t& pin, const double& period, const double& dutycycle, timer_callback StartCallback = nullptr,
+                       timer_callback StopCallback = nullptr)  
+    {     
+      return setupPWMChannel(pin, period, dutycycle, (void *) StartCallback, (void *) StopCallback);      
+    } 
     
-    // update number of timers
-    numChannels--;
-  }
-}
-
-///////////////////////////////////////////////////
-
-void AVR_Slow_PWM_ISR::restartChannel(unsigned channelNum) 
-{
-  if (channelNum >= MAX_NUMBER_CHANNELS) 
-  {
-    return;
-  }
-
-  PWM[channelNum].prevTime = timeNow();
-}
-
-///////////////////////////////////////////////////
-
-bool AVR_Slow_PWM_ISR::isEnabled(unsigned channelNum) 
-{
-  if (channelNum >= MAX_NUMBER_CHANNELS) 
-  {
-    return false;
-  }
-
-  return PWM[channelNum].enabled;
-}
-
-///////////////////////////////////////////////////
-
-void AVR_Slow_PWM_ISR::enable(unsigned channelNum) 
-{
-  if (channelNum >= MAX_NUMBER_CHANNELS) 
-  {
-    return;
-  }
-
-  PWM[channelNum].enabled = true;
-}
-
-///////////////////////////////////////////////////
-
-void AVR_Slow_PWM_ISR::disable(unsigned channelNum) 
-{
-  if (channelNum >= MAX_NUMBER_CHANNELS) 
-  {
-    return;
-  }
-
-  PWM[channelNum].enabled = false;
-}
-
-///////////////////////////////////////////////////
-
-void AVR_Slow_PWM_ISR::enableAll() 
-{
-  // Enable all timers with a callbackStart assigned (used)
-
-  for (uint8_t channelNum = 0; channelNum < MAX_NUMBER_CHANNELS; channelNum++) 
-  {
-    if (PWM[channelNum].period != 0)
+    //////////////////////////////////////////////////////////////////
+    
+    // low level function to modify a PWM channel
+    // returns the true on success or false on failure
+    bool modifyPWMChannel(const uint8_t& channelNum, const uint32_t& pin, const double& frequency, const double& dutycycle)
     {
-      PWM[channelNum].enabled = true;
+      double period = 0;
+      
+      if ( ( frequency > 0 ) && ( frequency <= 1000 ) )
+      {
+#if USING_MICROS_RESOLUTION
+      // period in us
+      period = 1000000.0f / frequency;
+#else    
+      // period in ms
+      period = 1000.0f / frequency;
+#endif
+      }
+      else
+      {       
+        PWM_LOGERROR("Error: Invalid frequency, max is 1000Hz");
+        return false;
+      }
+      
+      return modifyPWMChannel_Period(channelNum, pin, period, dutycycle);
     }
-  }
-}
+    
+    //////////////////////////////////////////////////////////////////
+    
+    //period in us
+    bool modifyPWMChannel_Period(const uint8_t& channelNum, const uint32_t& pin, const double& period, const double& dutycycle);
+    
+    //////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////
+    // destroy the specified PWM channel
+    void deleteChannel(const uint8_t& channelNum);
 
-void AVR_Slow_PWM_ISR::disableAll() 
-{
-  // Disable all timers with a callbackStart assigned (used)
-  for (uint8_t channelNum = 0; channelNum < MAX_NUMBER_CHANNELS; channelNum++) 
-  {
-    if (PWM[channelNum].period != 0)
+    // restart the specified PWM channel
+    void restartChannel(const uint8_t& channelNum);
+
+    // returns true if the specified PWM channel is enabled
+    bool isEnabled(const uint8_t& channelNum);
+
+    // enables the specified PWM channel
+    void enable(const uint8_t& channelNum);
+
+    // disables the specified PWM channel
+    void disable(const uint8_t& channelNum);
+
+    // enables all PWM channels
+    void enableAll();
+
+    // disables all PWM channels
+    void disableAll();
+
+    // enables the specified PWM channel if it's currently disabled, and vice-versa
+    void toggle(const uint8_t& channelNum);
+
+    // returns the number of used PWM channels
+    int8_t getnumChannels();
+
+    // returns the number of available PWM channels
+    uint8_t getNumAvailablePWMChannels() 
     {
-      PWM[channelNum].enabled = false;
-    }
-  }
-}
+      return MAX_NUMBER_CHANNELS - numChannels;
+    };
 
-///////////////////////////////////////////////////
+  private:
 
-void AVR_Slow_PWM_ISR::toggle(unsigned channelNum) 
-{
-  if (channelNum >= MAX_NUMBER_CHANNELS) 
-  {
-    return;
-  }
+    // low level function to initialize and enable a new PWM channel
+    // returns the PWM channel number (channelNum) on success or
+    // -1 on failure (f == NULL) or no free PWM channels 
+    int8_t setupPWMChannel(const uint32_t& pin, const double& period, const double& dutycycle, void* cbStartFunc = nullptr, void* cbStopFunc = nullptr);
 
-  PWM[channelNum].enabled = !PWM[channelNum].enabled;
-}
+    // find the first available slot
+    int8_t findFirstFreeSlot();
 
-///////////////////////////////////////////////////
+    typedef struct 
+    {
+      ///////////////////////////////////
+      
+      
+      ///////////////////////////////////
+      
+      uint32_t      prevTime;           // value returned by the micros() or millis() function in the previous run() call
+      double        period;             // period value, in us / ms
+      uint32_t      onTime;             // onTime value, ( period * dutyCycle / 100 ) us  / ms
+      
+      void*         callbackStart;      // pointer to the callback function when PWM pulse starts (HIGH)
+      void*         callbackStop;       // pointer to the callback function when PWM pulse stops (LOW)
+      
+      ////////////////////////////////////////////////////////////
+      
+      uint32_t      pin;                // PWM pin
+      bool          pinHigh;            // true if PWM pin is HIGH
+      ////////////////////////////////////////////////////////////
+      
+      bool          enabled;            // true if enabled
+    } PWM_t;
 
-unsigned AVR_Slow_PWM_ISR::getnumChannels() 
-{
-  return numChannels;
-}
+    volatile PWM_t PWM[MAX_NUMBER_CHANNELS];
+
+    // actual number of PWM channels in use (-1 means uninitialized)
+    volatile int8_t numChannels;
+};
 
 #endif    // AVR_SLOW_PWM_ISR_HPP
+
 

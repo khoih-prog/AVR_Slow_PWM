@@ -1,6 +1,6 @@
 {
   "name": "AVR_Slow_PWM",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "keywords": "timing, device, control, timer, interrupt, hardware, isr, isr-based, hardware-timer, mission-critical, accuracy, precise, non-blocking, avr, mega-2560, nano, uno, leonardo, 32u4, 16u4, at-mega",
   "description": "This library enables you to use ISR-based PWM channels on AVR-based boards, such as Mega-2560, UNO,Nano, Leonardo, etc., to create and output PWM any GPIO pin. It now supports 16 ISR-based PWM channels, while consuming only 1 Hardware Timer. PWM channel interval can be very long (ulong microsecs / millisecs). The most important feature is they're ISR-based PWM channels, supporting lower PWM frequencies with suitable accuracy. Their executions are not blocked by bad-behaving functions or tasks. This important feature is absolutely necessary for mission-critical tasks. These ISR-based PWMs, still work even if other software functions are blocking. Moreover, they are much more precise (certainly depending on clock frequency accuracy) than other software-based PWM using millis() or micros(). That's necessary if you need to control devices requiring high precision. Now you can change the PWM settings on-the-fly",
   "authors":
@@ -12,7 +12,7 @@
   "repository":
   {
     "type": "git",
-    "url": "//https://github.com/khoih-prog/AVR_Slow_PWM"
+    "url": "https://github.com/khoih-prog/AVR_Slow_PWM.git"
   },
   "homepage": "https://github.com/khoih-prog/AVR_Slow_PWM",
   "export": {
@@ -22,8 +22,9 @@
       "tests"
     ]
   },
+  "license": "MIT",
   "frameworks": "*",
   "platforms": "avr",
   "examples": "examples/*/*/*.ino",
-  "license": "MIT"
+  "headers": ["AVR_Slow_PWM.h", "AVR_Slow_PWM.hpp"]
 }

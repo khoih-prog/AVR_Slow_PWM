@@ -12,6 +12,7 @@
 ## Table of Contents
 
 * [Changelog](#changelog)
+  * [Releases v1.2.0](#releases-v120)
   * [Releases v1.1.0](#releases-v110)
   * [Initial Releases v1.0.0](#Initial-Releases-v100)
 
@@ -19,6 +20,14 @@
 ---
 
 ## Changelog
+
+### Releases v1.2.0
+
+1. Fix `multiple-definitions` linker error. Drop `src_cpp` and `src_h` directories
+2. Add example [multiFileProject](examples/multiFileProject) to demo for multiple-file project
+3. Improve accuracy by using `double`, instead of `uint32_t` for `dutycycle`, `period`
+4. Optimize library code by using `reference-passing` instead of `value-passing`
+5. Update examples accordingly
 
 ### Releases v1.1.0
 

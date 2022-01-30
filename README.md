@@ -11,6 +11,7 @@
 
 ## Table of Contents
 
+* [Important Change from v1.2.0](#Important-Change-from-v120)
 * [Why do we need this AVR_Slow_PWM library](#why-do-we-need-this-AVR_Slow_PWM-library)
   * [Features](#features)
   * [Why using ISR-based PWM is better](#why-using-isr-based-pwm-is-better)
@@ -38,6 +39,7 @@
   * [ 3. ISR_8_PWMs_Array_Simple](examples/ISR_8_PWMs_Array_Simple)
   * [ 4. ISR_Changing_PWM](examples/ISR_Changing_PWM)
   * [ 5. ISR_Modify_PWM](examples/ISR_Modify_PWM)
+  * [ 6. multiFileProject](examples/multiFileProject) **New**
 * [Example ISR_8_PWMs_Array_Complex](#Example-ISR_8_PWMs_Array_Complex)
 * [Debug Terminal Output Samples](#debug-terminal-output-samples)
   * [1. ISR_8_PWMs_Array_Complex on Arduino AVR Leonardo ATMega32U4](#1-ISR_8_PWMs_Array_Complex-on-Arduino-AVR-Leonardo-ATMega32U4)
@@ -54,6 +56,13 @@
 * [Contributing](#contributing)
 * [License](#license)
 * [Copyright](#copyright)
+
+---
+---
+
+### Important Change from v1.2.0
+
+Please have a look at [HOWTO Fix `Multiple Definitions` Linker Error](#howto-fix-multiple-definitions-linker-error)
 
 ---
 ---
@@ -122,13 +131,15 @@ The catch is **your function is now part of an ISR (Interrupt Service Routine), 
 
 ## Prerequisites
 
- 1. [`Arduino IDE 1.8.16+` for Arduino](https://www.arduino.cc/en/Main/Software)
+ 1. [`Arduino IDE 1.8.19+` for Arduino](https://github.com/arduino/Arduino). [![GitHub release](https://img.shields.io/github/release/arduino/Arduino.svg)](https://github.com/arduino/Arduino/releases/latest)
  2. [`Arduino AVR core 1.8.3+`](https://github.com/arduino/ArduinoCore-avr) for Arduino AVR boards. Use Arduino Board Manager to install. [![Latest release](https://img.shields.io/github/release/arduino/ArduinoCore-avr.svg)](https://github.com/arduino/ArduinoCore-avr/releases/latest/)
  3. [`Adafruit AVR core 1.4.14+`](https://github.com/adafruit/Adafruit_Arduino_Boards) for Adafruit AVR boards. Use Arduino Board Manager to install. 
  4. [`Sparkfun AVR core 1.1.13+`](https://github.com/sparkfun/Arduino_Boards) for Sparkfun AVR boards. Use Arduino Board Manager to install. 
  
  5. To use with certain example
-   - [`SimpleTimer library`](https://github.com/jfturcot/SimpleTimer) for [ISR_8_PWMs_Array_Complex example](examples/ISR_8_PWMs_Array_Complex).
+   - [`SimpleTimer library`](https://github.com/jfturcot/SimpleTimer) to use with some examples.
+   
+   
 ---
 ---
 
@@ -161,24 +172,26 @@ Another way to install is to:
 
 ### HOWTO Fix `Multiple Definitions` Linker Error
 
-The current library implementation, using **xyz-Impl.h instead of standard xyz.cpp**, possibly creates certain `Multiple Definitions` Linker error in certain use cases. Although it's simple to just modify several lines of code, either in the library or in the application, the library is adding 2 more source directories
+The current library implementation, using `xyz-Impl.h` instead of standard `xyz.cpp`, possibly creates certain `Multiple Definitions` Linker error in certain use cases.
 
-1. **scr_h** for new h-only files
-2. **src_cpp** for standard h/cpp files
+You can include this `.hpp` file
 
-besides the standard **src** directory.
+```
+// Can be included as many times as necessary, without `Multiple Definitions` Linker Error
+#include "AVR_Slow_PWM.hpp"     //https://github.com/khoih-prog/AVR_Slow_PWM
+```
 
-To use the **old standard cpp** way, locate this library' directory, then just 
+in many files. But be sure to use the following `.h` file **in just 1 `.h`, `.cpp` or `.ino` file**, which must **not be included in any other file**, to avoid `Multiple Definitions` Linker Error
 
-1. **Delete the all the files in src directory.**
-2. **Copy all the files in src_cpp directory into src.**
-3. Close then reopen the application code in Arduino IDE, etc. to recompile from scratch.
+```
+// To be included only in main(), .ino with setup() to avoid `Multiple Definitions` Linker Error
+#include "AVR_Slow_PWM.h"           //https://github.com/khoih-prog/AVR_Slow_PWM
+```
 
-To re-use the **new h-only** way, just 
+Check the new [**multiFileProject** example](examples/multiFileProject) for a `HOWTO` demo.
 
-1. **Delete the all the files in src directory.**
-2. **Copy the files in src_h directory into src.**
-3. Close then reopen the application code in Arduino IDE, etc. to recompile from scratch.
+Have a look at the discussion in [Different behaviour using the src_cpp or src_h lib #80](https://github.com/khoih-prog/ESPAsync_WiFiManager/discussions/80)
+
 
 ---
 ---
@@ -277,6 +290,7 @@ void setup()
  3. [ISR_8_PWMs_Array_Simple](examples/ISR_8_PWMs_Array_Simple)
  4. [ISR_Changing_PWM](examples/ISR_Changing_PWM)
  5. [ISR_Modify_PWM](examples/ISR_Modify_PWM)
+ 6. [**multiFileProject**](examples/multiFileProject) **New** 
 
  
 ---
@@ -305,6 +319,7 @@ void setup()
 
 #define USING_MICROS_RESOLUTION       true  //false 
 
+// To be included only in main(), .ino with setup() to avoid `Multiple Definitions` Linker Error
 #include "AVR_Slow_PWM.h"
 
 #include <SimpleTimer.h>              // https://github.com/jfturcot/SimpleTimer
@@ -376,9 +391,9 @@ typedef struct
   irqCallback   irqCallbackStartFunc;
   irqCallback   irqCallbackStopFunc;
 
-  uint32_t      PWM_Freq;
+  double        PWM_Freq;
 
-  uint32_t      PWM_DutyCycle;
+  double        PWM_DutyCycle;
 
   uint32_t      deltaMicrosStart;
   uint32_t      previousMicrosStart;
@@ -398,29 +413,29 @@ void doingSomethingStop(int index);
 
 #else   // #if USE_COMPLEX_STRUCT
 
-volatile unsigned long deltaMicrosStart    [NUMBER_ISR_PWMS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-volatile unsigned long previousMicrosStart [NUMBER_ISR_PWMS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+volatile unsigned long deltaMicrosStart    [] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+volatile unsigned long previousMicrosStart [] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
-volatile unsigned long deltaMicrosStop     [NUMBER_ISR_PWMS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-volatile unsigned long previousMicrosStop  [NUMBER_ISR_PWMS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+volatile unsigned long deltaMicrosStop     [] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+volatile unsigned long previousMicrosStop  [] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 
 // You can assign any interval for any timer here, in Microseconds
-uint32_t PWM_Period[NUMBER_ISR_PWMS] =
+double PWM_Period[] =
 {
-  1000L,   500L,   333L,   250L,   200L,   166L,   142L,   125L
+  1000.0,   500.0,   333.333,   250.0,   200.0,   166.667,   142.857,   125.0
 };
 
 // You can assign any interval for any timer here, in Hz
-double PWM_Freq[NUMBER_ISR_PWMS] =
+double PWM_Freq[] =
 {
   1.0f,  2.0f,  3.0f,  4.0f,  5.0f,  6.0f,  7.0f,  8.0f,
 };
 
 // You can assign any interval for any timer here, in Microseconds
-uint32_t PWM_DutyCycle[NUMBER_ISR_PWMS] =
+double PWM_DutyCycle[] =
 {
-  5, 10, 20, 25, 30, 35, 40, 45
+  5.0, 10.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0
 };
 
 void doingSomethingStart(int index)
@@ -534,17 +549,17 @@ void doingSomethingStop7()
 
 #if USE_COMPLEX_STRUCT
 
-ISR_PWM_Data curISR_PWM_Data[NUMBER_ISR_PWMS] =
+ISR_PWM_Data curISR_PWM_Data[] =
 {
   // pin, irqCallbackStartFunc, irqCallbackStopFunc, PWM_Freq, PWM_DutyCycle, deltaMicrosStart, previousMicrosStart, deltaMicrosStop, previousMicrosStop
-  { LED_BUILTIN,  doingSomethingStart0,    doingSomethingStop0,    1,   5, 0, 0, 0, 0 },
-  { PIN_D0,       doingSomethingStart1,    doingSomethingStop1,    2,  10, 0, 0, 0, 0 },
-  { PIN_D1,       doingSomethingStart2,    doingSomethingStop2,    3,  20, 0, 0, 0, 0 },
-  { PIN_D2,       doingSomethingStart3,    doingSomethingStop3,    4,  25, 0, 0, 0, 0 },
-  { PIN_D3,       doingSomethingStart4,    doingSomethingStop4,    5,  30, 0, 0, 0, 0 },
-  { PIN_D4,       doingSomethingStart5,    doingSomethingStop5,    6,  35, 0, 0, 0, 0 },
-  { PIN_D5,       doingSomethingStart6,    doingSomethingStop6,    7,  40, 0, 0, 0, 0 },
-  { PIN_D6,       doingSomethingStart7,    doingSomethingStop7,    8,  45, 0, 0, 0, 0 },
+  { LED_BUILTIN,  doingSomethingStart0,    doingSomethingStop0,    1.0,   5.0, 0, 0, 0, 0 },
+  { PIN_D0,       doingSomethingStart1,    doingSomethingStop1,    2.0,  10.0, 0, 0, 0, 0 },
+  { PIN_D1,       doingSomethingStart2,    doingSomethingStop2,    3.0,  20.0, 0, 0, 0, 0 },
+  { PIN_D2,       doingSomethingStart3,    doingSomethingStop3,    4.0,  25.0, 0, 0, 0, 0 },
+  { PIN_D3,       doingSomethingStart4,    doingSomethingStop4,    5.0,  30.0, 0, 0, 0, 0 },
+  { PIN_D4,       doingSomethingStart5,    doingSomethingStop5,    6.0,  35.0, 0, 0, 0, 0 },
+  { PIN_D5,       doingSomethingStart6,    doingSomethingStop6,    7.0,  40.0, 0, 0, 0, 0 },
+  { PIN_D6,       doingSomethingStart7,    doingSomethingStop7,    8.0,  45.0, 0, 0, 0, 0 },
 };
 
 
@@ -568,13 +583,13 @@ void doingSomethingStop(int index)
 
 #else   // #if USE_COMPLEX_STRUCT
 
-irqCallback irqCallbackStartFunc[NUMBER_ISR_PWMS] =
+irqCallback irqCallbackStartFunc[] =
 {
   doingSomethingStart0,  doingSomethingStart1,  doingSomethingStart2,  doingSomethingStart3,
   doingSomethingStart4,  doingSomethingStart5,  doingSomethingStart6,  doingSomethingStart7
 };
 
-irqCallback irqCallbackStopFunc[NUMBER_ISR_PWMS] =
+irqCallback irqCallbackStopFunc[] =
 {
   doingSomethingStop0,  doingSomethingStop1,  doingSomethingStop2,  doingSomethingStop3,
   doingSomethingStop4,  doingSomethingStop5,  doingSomethingStop6,  doingSomethingStop7
@@ -609,9 +624,9 @@ void simpleTimerDoingSomething2s()
     Serial.print(F("PWM Channel : ")); Serial.print(i);
     Serial.print(F(", prog Period (ms): "));
 
-    Serial.print(1000.f / curISR_PWM_Data[i].PWM_Freq);
+    Serial.print(1000.0f / curISR_PWM_Data[i].PWM_Freq);
 
-    Serial.print(F(", actual : ")); Serial.print((uint32_t) curISR_PWM_Data[i].deltaMicrosStart);
+    Serial.print(F(", actual (uS) : ")); Serial.print(curISR_PWM_Data[i].deltaMicrosStart);
 
     Serial.print(F(", prog DutyCycle : "));
 
@@ -625,7 +640,7 @@ void simpleTimerDoingSomething2s()
 
     Serial.print(F("PWM Channel : ")); Serial.print(i);
 
-    Serial.print(1000 / PWM_Freq[i]);
+    Serial.print(1000.0f / PWM_Freq[i]);
 
     Serial.print(F(", prog. Period (us): ")); Serial.print(PWM_Period[i]);
     Serial.print(F(", actual : ")); Serial.print(deltaMicrosStart[i]);
@@ -775,7 +790,7 @@ The following is the sample terminal output when running example [ISR_8_PWMs_Arr
 
 ```
 Starting ISR_8_PWMs_Array_Complex on Arduino AVR ATMega32U4
-AVR_Slow_PWM v1.1.0
+AVR_Slow_PWM v1.2.0
 CPU Frequency = 16 MHz
 [PWM] T3
 [PWM] Freq * 1000 = 10000000.00
@@ -793,23 +808,23 @@ Channel : 5	Period : 166666		OnTime : 58333	Start_Time : 3520968
 Channel : 6	Period : 142857		OnTime : 57142	Start_Time : 3520968
 Channel : 7	Period : 125000		OnTime : 56250	Start_Time : 3520968
 SimpleTimer (us): 2000, us : 13547548, Dus : 10026624
-PWM Channel : 0, prog Period (ms): 1000.00, actual : 1000000, prog DutyCycle : 5, actual : 5.00
-PWM Channel : 1, prog Period (ms): 500.00, actual : 500016, prog DutyCycle : 10, actual : 10.00
-PWM Channel : 2, prog Period (ms): 333.33, actual : 333396, prog DutyCycle : 20, actual : 19.98
-PWM Channel : 3, prog Period (ms): 250.00, actual : 250028, prog DutyCycle : 25, actual : 24.96
-PWM Channel : 4, prog Period (ms): 200.00, actual : 200192, prog DutyCycle : 30, actual : 29.87
-PWM Channel : 5, prog Period (ms): 166.67, actual : 166792, prog DutyCycle : 35, actual : 34.89
-PWM Channel : 6, prog Period (ms): 142.86, actual : 142992, prog DutyCycle : 40, actual : 39.87
-PWM Channel : 7, prog Period (ms): 125.00, actual : 125192, prog DutyCycle : 45, actual : 44.89
+PWM Channel : 0, prog Period (ms): 1000.00, actual (uS) : 1000000, prog DutyCycle : 5, actual : 5.00
+PWM Channel : 1, prog Period (ms): 500.00, actual (uS) : 500016, prog DutyCycle : 10, actual : 10.00
+PWM Channel : 2, prog Period (ms): 333.33, actual (uS) : 333396, prog DutyCycle : 20, actual : 19.98
+PWM Channel : 3, prog Period (ms): 250.00, actual (uS) : 250028, prog DutyCycle : 25, actual : 24.96
+PWM Channel : 4, prog Period (ms): 200.00, actual (uS) : 200192, prog DutyCycle : 30, actual : 29.87
+PWM Channel : 5, prog Period (ms): 166.67, actual (uS) : 166792, prog DutyCycle : 35, actual : 34.89
+PWM Channel : 6, prog Period (ms): 142.86, actual (uS) : 142992, prog DutyCycle : 40, actual : 39.87
+PWM Channel : 7, prog Period (ms): 125.00, actual (uS) : 125192, prog DutyCycle : 45, actual : 44.89
 SimpleTimer (us): 2000, us : 23596540, Dus : 10048992
-PWM Channel : 0, prog Period (ms): 1000.00, actual : 1000000, prog DutyCycle : 5, actual : 5.00
-PWM Channel : 1, prog Period (ms): 500.00, actual : 500012, prog DutyCycle : 10, actual : 10.00
-PWM Channel : 2, prog Period (ms): 333.33, actual : 333396, prog DutyCycle : 20, actual : 19.98
-PWM Channel : 3, prog Period (ms): 250.00, actual : 250028, prog DutyCycle : 25, actual : 24.95
-PWM Channel : 4, prog Period (ms): 200.00, actual : 200192, prog DutyCycle : 30, actual : 29.88
-PWM Channel : 5, prog Period (ms): 166.67, actual : 166796, prog DutyCycle : 35, actual : 34.90
-PWM Channel : 6, prog Period (ms): 142.86, actual : 142992, prog DutyCycle : 40, actual : 39.87
-PWM Channel : 7, prog Period (ms): 125.00, actual : 125192, prog DutyCycle : 45, actual : 44.89
+PWM Channel : 0, prog Period (ms): 1000.00, actual (uS) : 1000000, prog DutyCycle : 5, actual : 5.00
+PWM Channel : 1, prog Period (ms): 500.00, actual (uS) : 500012, prog DutyCycle : 10, actual : 10.00
+PWM Channel : 2, prog Period (ms): 333.33, actual (uS) : 333396, prog DutyCycle : 20, actual : 19.98
+PWM Channel : 3, prog Period (ms): 250.00, actual (uS) : 250028, prog DutyCycle : 25, actual : 24.95
+PWM Channel : 4, prog Period (ms): 200.00, actual (uS) : 200192, prog DutyCycle : 30, actual : 29.88
+PWM Channel : 5, prog Period (ms): 166.67, actual (uS) : 166796, prog DutyCycle : 35, actual : 34.90
+PWM Channel : 6, prog Period (ms): 142.86, actual (uS) : 142992, prog DutyCycle : 40, actual : 39.87
+PWM Channel : 7, prog Period (ms): 125.00, actual (uS) : 125192, prog DutyCycle : 45, actual : 44.89
 ```
 
 ---
@@ -820,7 +835,7 @@ The following is the sample terminal output when running example [**ISR_8_PWMs_A
 
 ```
 Starting ISR_8_PWMs_Array_Complex on Arduino AVR Mega2560/ADK
-AVR_Slow_PWM v1.1.0
+AVR_Slow_PWM v1.2.0
 CPU Frequency = 16 MHz
 [PWM] T3
 [PWM] Freq * 1000 = 10000000.00
@@ -838,23 +853,23 @@ Channel : 5	Period : 166666		OnTime : 58333	Start_Time : 2024988
 Channel : 6	Period : 142857		OnTime : 57142	Start_Time : 2024988
 Channel : 7	Period : 125000		OnTime : 56250	Start_Time : 2024988
 SimpleTimer (us): 2000, us : 12070388, Dus : 10045444
-PWM Channel : 0, prog Period (ms): 1000.00, actual : 1000000, prog DutyCycle : 5, actual : 4.98
-PWM Channel : 1, prog Period (ms): 500.00, actual : 499996, prog DutyCycle : 10, actual : 10.00
-PWM Channel : 2, prog Period (ms): 333.33, actual : 333396, prog DutyCycle : 20, actual : 19.98
-PWM Channel : 3, prog Period (ms): 250.00, actual : 250196, prog DutyCycle : 25, actual : 24.94
-PWM Channel : 4, prog Period (ms): 200.00, actual : 200192, prog DutyCycle : 30, actual : 29.88
-PWM Channel : 5, prog Period (ms): 166.67, actual : 166792, prog DutyCycle : 35, actual : 34.90
-PWM Channel : 6, prog Period (ms): 142.86, actual : 142988, prog DutyCycle : 40, actual : 39.87
-PWM Channel : 7, prog Period (ms): 125.00, actual : 125196, prog DutyCycle : 45, actual : 44.89
+PWM Channel : 0, prog Period (ms): 1000.00, actual (uS) : 1000000, prog DutyCycle : 5, actual : 4.98
+PWM Channel : 1, prog Period (ms): 500.00, actual (uS) : 499996, prog DutyCycle : 10, actual : 10.00
+PWM Channel : 2, prog Period (ms): 333.33, actual (uS) : 333396, prog DutyCycle : 20, actual : 19.98
+PWM Channel : 3, prog Period (ms): 250.00, actual (uS) : 250196, prog DutyCycle : 25, actual : 24.94
+PWM Channel : 4, prog Period (ms): 200.00, actual (uS) : 200192, prog DutyCycle : 30, actual : 29.88
+PWM Channel : 5, prog Period (ms): 166.67, actual (uS) : 166792, prog DutyCycle : 35, actual : 34.90
+PWM Channel : 6, prog Period (ms): 142.86, actual (uS) : 142988, prog DutyCycle : 40, actual : 39.87
+PWM Channel : 7, prog Period (ms): 125.00, actual (uS) : 125196, prog DutyCycle : 45, actual : 44.89
 SimpleTimer (us): 2000, us : 22144772, Dus : 10074384
-PWM Channel : 0, prog Period (ms): 1000.00, actual : 1000000, prog DutyCycle : 5, actual : 5.00
-PWM Channel : 1, prog Period (ms): 500.00, actual : 499996, prog DutyCycle : 10, actual : 10.00
-PWM Channel : 2, prog Period (ms): 333.33, actual : 333396, prog DutyCycle : 20, actual : 19.98
-PWM Channel : 3, prog Period (ms): 250.00, actual : 250196, prog DutyCycle : 25, actual : 24.94
-PWM Channel : 4, prog Period (ms): 200.00, actual : 200196, prog DutyCycle : 30, actual : 29.87
-PWM Channel : 5, prog Period (ms): 166.67, actual : 166792, prog DutyCycle : 35, actual : 34.90
-PWM Channel : 6, prog Period (ms): 142.86, actual : 143016, prog DutyCycle : 40, actual : 39.87
-PWM Channel : 7, prog Period (ms): 125.00, actual : 125008, prog DutyCycle : 45, actual : 44.96
+PWM Channel : 0, prog Period (ms): 1000.00, actual (uS) : 1000000, prog DutyCycle : 5, actual : 5.00
+PWM Channel : 1, prog Period (ms): 500.00, actual (uS) : 499996, prog DutyCycle : 10, actual : 10.00
+PWM Channel : 2, prog Period (ms): 333.33, actual (uS) : 333396, prog DutyCycle : 20, actual : 19.98
+PWM Channel : 3, prog Period (ms): 250.00, actual (uS) : 250196, prog DutyCycle : 25, actual : 24.94
+PWM Channel : 4, prog Period (ms): 200.00, actual (uS) : 200196, prog DutyCycle : 30, actual : 29.87
+PWM Channel : 5, prog Period (ms): 166.67, actual (uS) : 166792, prog DutyCycle : 35, actual : 34.90
+PWM Channel : 6, prog Period (ms): 142.86, actual (uS) : 143016, prog DutyCycle : 40, actual : 39.87
+PWM Channel : 7, prog Period (ms): 125.00, actual (uS) : 125008, prog DutyCycle : 45, actual : 44.96
 ```
 
 ---
@@ -865,7 +880,7 @@ The following is the sample terminal output when running example [**ISR_8_PWMs_A
 
 ```
 Starting ISR_8_PWMs_Array_Complex on Arduino AVR UNO, Nano, etc.
-AVR_Slow_PWM v1.1.0
+AVR_Slow_PWM v1.2.0
 CPU Frequency = 16 MHz
 [PWM] T1
 [PWM] Freq * 1000 = 10000000.00
@@ -884,23 +899,23 @@ Channel : 5	Period : 166666		OnTime : 58333	Start_Time : 2026740
 Channel : 6	Period : 142857		OnTime : 57142	Start_Time : 2026740
 Channel : 7	Period : 125000		OnTime : 56250	Start_Time : 2026740
 SimpleTimer (us): 2000, us : 12072128, Dus : 10045452
-PWM Channel : 0, prog Period (ms): 1000.00, actual : 1000000, prog DutyCycle : 5, actual : 5.00
-PWM Channel : 1, prog Period (ms): 500.00, actual : 500012, prog DutyCycle : 10, actual : 10.00
-PWM Channel : 2, prog Period (ms): 333.33, actual : 333396, prog DutyCycle : 20, actual : 19.98
-PWM Channel : 3, prog Period (ms): 250.00, actual : 250024, prog DutyCycle : 25, actual : 24.95
-PWM Channel : 4, prog Period (ms): 200.00, actual : 200208, prog DutyCycle : 30, actual : 29.96
-PWM Channel : 5, prog Period (ms): 166.67, actual : 166792, prog DutyCycle : 35, actual : 34.90
-PWM Channel : 6, prog Period (ms): 142.86, actual : 142992, prog DutyCycle : 40, actual : 39.87
-PWM Channel : 7, prog Period (ms): 125.00, actual : 125192, prog DutyCycle : 45, actual : 44.89
+PWM Channel : 0, prog Period (ms): 1000.00, actual (uS) : 1000000, prog DutyCycle : 5, actual : 5.00
+PWM Channel : 1, prog Period (ms): 500.00, actual (uS) : 500012, prog DutyCycle : 10, actual : 10.00
+PWM Channel : 2, prog Period (ms): 333.33, actual (uS) : 333396, prog DutyCycle : 20, actual : 19.98
+PWM Channel : 3, prog Period (ms): 250.00, actual (uS) : 250024, prog DutyCycle : 25, actual : 24.95
+PWM Channel : 4, prog Period (ms): 200.00, actual (uS) : 200208, prog DutyCycle : 30, actual : 29.96
+PWM Channel : 5, prog Period (ms): 166.67, actual (uS) : 166792, prog DutyCycle : 35, actual : 34.90
+PWM Channel : 6, prog Period (ms): 142.86, actual (uS) : 142992, prog DutyCycle : 40, actual : 39.87
+PWM Channel : 7, prog Period (ms): 125.00, actual (uS) : 125192, prog DutyCycle : 45, actual : 44.89
 SimpleTimer (us): 2000, us : 22147164, Dus : 10075036
-PWM Channel : 0, prog Period (ms): 1000.00, actual : 1000000, prog DutyCycle : 5, actual : 5.00
-PWM Channel : 1, prog Period (ms): 500.00, actual : 500012, prog DutyCycle : 10, actual : 10.00
-PWM Channel : 2, prog Period (ms): 333.33, actual : 333396, prog DutyCycle : 20, actual : 19.98
-PWM Channel : 3, prog Period (ms): 250.00, actual : 250196, prog DutyCycle : 25, actual : 24.94
-PWM Channel : 4, prog Period (ms): 200.00, actual : 199996, prog DutyCycle : 30, actual : 30.00
-PWM Channel : 5, prog Period (ms): 166.67, actual : 166792, prog DutyCycle : 35, actual : 34.90
-PWM Channel : 6, prog Period (ms): 142.86, actual : 143012, prog DutyCycle : 40, actual : 39.87
-PWM Channel : 7, prog Period (ms): 125.00, actual : 125012, prog DutyCycle : 45, actual : 44.95
+PWM Channel : 0, prog Period (ms): 1000.00, actual (uS) : 1000000, prog DutyCycle : 5, actual : 5.00
+PWM Channel : 1, prog Period (ms): 500.00, actual (uS) : 500012, prog DutyCycle : 10, actual : 10.00
+PWM Channel : 2, prog Period (ms): 333.33, actual (uS) : 333396, prog DutyCycle : 20, actual : 19.98
+PWM Channel : 3, prog Period (ms): 250.00, actual (uS) : 250196, prog DutyCycle : 25, actual : 24.94
+PWM Channel : 4, prog Period (ms): 200.00, actual (uS) : 199996, prog DutyCycle : 30, actual : 30.00
+PWM Channel : 5, prog Period (ms): 166.67, actual (uS) : 166792, prog DutyCycle : 35, actual : 34.90
+PWM Channel : 6, prog Period (ms): 142.86, actual (uS) : 143012, prog DutyCycle : 40, actual : 39.87
+PWM Channel : 7, prog Period (ms): 125.00, actual (uS) : 125012, prog DutyCycle : 45, actual : 44.95
 ```
 
 ---
@@ -911,7 +926,7 @@ The following is the sample terminal output when running example [ISR_Modify_PWM
 
 ```
 Starting ISR_Modify_PWM on Arduino AVR Mega2560/ADK
-AVR_Slow_PWM v1.1.0
+AVR_Slow_PWM v1.2.0
 CPU Frequency = 16 MHz
 [PWM] T3
 [PWM] Freq * 1000 = 10000000.00
@@ -935,7 +950,7 @@ The following is the sample terminal output when running example [ISR_Changing_P
 
 ```
 Starting ISR_Changing_PWM on Arduino AVR Mega2560/ADK
-AVR_Slow_PWM v1.1.0
+AVR_Slow_PWM v1.2.0
 CPU Frequency = 16 MHz
 [PWM] T3
 [PWM] Freq * 1000 = 10000000.00
@@ -998,6 +1013,10 @@ Submit issues to: [AVR_Slow_PWM issues](https://github.com/khoih-prog/AVR_Slow_P
 1. Basic hardware multi-channel PWM for **AVR boards, such as Mega-2560, UNO,Nano, Leonardo, etc.** using AVR core
 2. Add Table of Contents
 3. Add functions to modify PWM settings on-the-fly
+4. Fix `multiple-definitions` linker error. Drop `src_cpp` and `src_h` directories
+5. Add example [multiFileProject](examples/multiFileProject) to demo for multiple-file project
+6. Improve accuracy by using `double`, instead of `uint32_t` for `dutycycle`, `period`
+7. Optimize library code by using `reference-passing` instead of `value-passing`
 
 ---
 ---

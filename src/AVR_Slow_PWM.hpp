@@ -18,12 +18,14 @@
   Therefore, their executions are not blocked by bad-behaving functions / tasks.
   This important feature is absolutely necessary for mission-critical tasks.
 
-  Version: 1.1.0
+  Version: 1.2.1
 
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.0.0   K.Hoang      27/09/2021 Initial coding for AVR-based boards  (UNO, Nano, Mega, 32U4, 16U4, etc. )
   1.1.0   K Hoang      10/11/2021 Add functions to modify PWM settings on-the-fly
+  1.2.0   K Hoang      29/01/2022 Fix multiple-definitions linker error. Improve accuracy
+  1.2.1   K Hoang      30/01/2022 DutyCycle to be updated at the end current PWM period
 *****************************************************************************************************************************/
 
 #pragma once
@@ -100,13 +102,13 @@
 #endif
 
 #ifndef AVR_SLOW_PWM_VERSION
-  #define AVR_SLOW_PWM_VERSION           F("AVR_Slow_PWM v1.2.0")
+  #define AVR_SLOW_PWM_VERSION           F("AVR_Slow_PWM v1.2.1")
   
   #define AVR_SLOW_PWM_VERSION_MAJOR     1
   #define AVR_SLOW_PWM_VERSION_MINOR     2
-  #define AVR_SLOW_PWM_VERSION_PATCH     0
+  #define AVR_SLOW_PWM_VERSION_PATCH     1
 
-  #define AVR_SLOW_PWM_VERSION_INT      1002000
+  #define AVR_SLOW_PWM_VERSION_INT      1002001
 #endif
 
 #ifndef _PWM_LOGLEVEL_

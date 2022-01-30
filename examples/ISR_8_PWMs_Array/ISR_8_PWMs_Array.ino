@@ -37,7 +37,10 @@
 // Don't define _PWM_LOGLEVEL_ > 0. Only for special ISR debugging only. Can hang the system.
 #define _PWM_LOGLEVEL_      3
 
-#define USING_MICROS_RESOLUTION       true  //false 
+#define USING_MICROS_RESOLUTION       true    //false
+
+// Default is true, uncomment to false
+//#define CHANGING_PWM_END_OF_CYCLE     false
 
 // To be included only in main(), .ino with setup() to avoid `Multiple Definitions` Linker Error
 #include "AVR_Slow_PWM.h"

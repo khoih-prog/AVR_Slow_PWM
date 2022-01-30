@@ -317,7 +317,10 @@ void setup()
 // Don't define _PWM_LOGLEVEL_ > 0. Only for special ISR debugging only. Can hang the system.
 #define _PWM_LOGLEVEL_      3
 
-#define USING_MICROS_RESOLUTION       true  //false 
+#define USING_MICROS_RESOLUTION       true    //false
+
+// Default is true, uncomment to false
+//#define CHANGING_PWM_END_OF_CYCLE     false 
 
 // To be included only in main(), .ino with setup() to avoid `Multiple Definitions` Linker Error
 #include "AVR_Slow_PWM.h"
@@ -790,7 +793,7 @@ The following is the sample terminal output when running example [ISR_8_PWMs_Arr
 
 ```
 Starting ISR_8_PWMs_Array_Complex on Arduino AVR ATMega32U4
-AVR_Slow_PWM v1.2.0
+AVR_Slow_PWM v1.2.1
 CPU Frequency = 16 MHz
 [PWM] T3
 [PWM] Freq * 1000 = 10000000.00
@@ -835,7 +838,7 @@ The following is the sample terminal output when running example [**ISR_8_PWMs_A
 
 ```
 Starting ISR_8_PWMs_Array_Complex on Arduino AVR Mega2560/ADK
-AVR_Slow_PWM v1.2.0
+AVR_Slow_PWM v1.2.1
 CPU Frequency = 16 MHz
 [PWM] T3
 [PWM] Freq * 1000 = 10000000.00
@@ -880,7 +883,7 @@ The following is the sample terminal output when running example [**ISR_8_PWMs_A
 
 ```
 Starting ISR_8_PWMs_Array_Complex on Arduino AVR UNO, Nano, etc.
-AVR_Slow_PWM v1.2.0
+AVR_Slow_PWM v1.2.1
 CPU Frequency = 16 MHz
 [PWM] T1
 [PWM] Freq * 1000 = 10000000.00
@@ -926,7 +929,7 @@ The following is the sample terminal output when running example [ISR_Modify_PWM
 
 ```
 Starting ISR_Modify_PWM on Arduino AVR Mega2560/ADK
-AVR_Slow_PWM v1.2.0
+AVR_Slow_PWM v1.2.1
 CPU Frequency = 16 MHz
 [PWM] T3
 [PWM] Freq * 1000 = 10000000.00
@@ -950,7 +953,7 @@ The following is the sample terminal output when running example [ISR_Changing_P
 
 ```
 Starting ISR_Changing_PWM on Arduino AVR Mega2560/ADK
-AVR_Slow_PWM v1.2.0
+AVR_Slow_PWM v1.2.1
 CPU Frequency = 16 MHz
 [PWM] T3
 [PWM] Freq * 1000 = 10000000.00
@@ -1017,6 +1020,8 @@ Submit issues to: [AVR_Slow_PWM issues](https://github.com/khoih-prog/AVR_Slow_P
 5. Add example [multiFileProject](examples/multiFileProject) to demo for multiple-file project
 6. Improve accuracy by using `double`, instead of `uint32_t` for `dutycycle`, `period`
 7. Optimize library code by using `reference-passing` instead of `value-passing`
+8. DutyCycle to be optionally updated at the end current PWM period instead of immediately.
+
 
 ---
 ---

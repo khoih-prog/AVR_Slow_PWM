@@ -18,12 +18,14 @@
   Therefore, their executions are not blocked by bad-behaving functions / tasks.
   This important feature is absolutely necessary for mission-critical tasks.
 
-  Version: 1.1.0
+  Version: 1.2.1
 
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.0.0   K.Hoang      27/09/2021 Initial coding for AVR-based boards  (UNO, Nano, Mega, 32U4, 16U4, etc. )
   1.1.0   K Hoang      10/11/2021 Add functions to modify PWM settings on-the-fly
+  1.2.0   K Hoang      29/01/2022 Fix multiple-definitions linker error. Improve accuracy
+  1.2.1   K Hoang      30/01/2022 DutyCycle to be updated at the end current PWM period
 *****************************************************************************************************************************/
 
 #pragma once
@@ -100,13 +102,13 @@
 #endif
 
 #ifndef AVR_SLOW_PWM_VERSION
-  #define AVR_SLOW_PWM_VERSION           F("AVR_Slow_PWM v1.2.0")
+  #define AVR_SLOW_PWM_VERSION           F("AVR_Slow_PWM v1.2.1")
   
   #define AVR_SLOW_PWM_VERSION_MAJOR     1
   #define AVR_SLOW_PWM_VERSION_MINOR     2
-  #define AVR_SLOW_PWM_VERSION_PATCH     0
+  #define AVR_SLOW_PWM_VERSION_PATCH     1
 
-  #define AVR_SLOW_PWM_VERSION_INT      1002000
+  #define AVR_SLOW_PWM_VERSION_INT      1002001
 #endif
 
 #ifndef _PWM_LOGLEVEL_
@@ -137,6 +139,11 @@ typedef void (*timer_callback_p)(void *);
   #define USING_MICROS_RESOLUTION       false
 #endif
 
+#if !defined(CHANGING_PWM_END_OF_CYCLE)
+  #warning Using default CHANGING_PWM_END_OF_CYCLE == true
+  #define CHANGING_PWM_END_OF_CYCLE     true
+#endif
+
 #define INVALID_AVR_PIN         255
 
 //////////////////////////////////////////////////////////////////
@@ -162,9 +169,9 @@ class AVR_Slow_PWM_ISR
     int8_t setPWM(const uint32_t& pin, const double& frequency, const double& dutycycle, timer_callback StartCallback = nullptr, 
                 timer_callback StopCallback = nullptr)
     {
-      double period = 0;
+      double period = 0.0;
       
-     if ( ( frequency != 0 ) && ( frequency <= 1000 ) )
+      if ( ( frequency > 0.0 ) && ( frequency <= 1000.0 ) )
       {
 #if USING_MICROS_RESOLUTION
       // period in us
@@ -198,9 +205,9 @@ class AVR_Slow_PWM_ISR
     // returns the true on success or false on failure
     bool modifyPWMChannel(const uint8_t& channelNum, const uint32_t& pin, const double& frequency, const double& dutycycle)
     {
-      double period = 0;
+      double period = 0.0;
       
-      if ( ( frequency > 0 ) && ( frequency <= 1000 ) )
+      if ( ( frequency > 0.0 ) && ( frequency <= 1000.0 ) )
       {
 #if USING_MICROS_RESOLUTION
       // period in us
@@ -290,6 +297,11 @@ class AVR_Slow_PWM_ISR
       ////////////////////////////////////////////////////////////
       
       bool          enabled;            // true if enabled
+      
+      // New from v1.2.1
+      double        newPeriod;          // period value, in us / ms
+      double        newDutyCycle;       // from 0.00 to 100.00, double precision
+      //////
     } PWM_t;
 
     volatile PWM_t PWM[MAX_NUMBER_CHANNELS];

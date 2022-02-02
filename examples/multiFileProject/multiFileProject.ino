@@ -23,8 +23,8 @@
   #warning Using Timer3
 #endif
 
-#define AVR_SLOW_PWM_VERSION_MIN_TARGET      F("AVR_Slow_PWM v1.2.0")
-#define AVR_SLOW_PWM_VERSION_MIN             1002000
+#define AVR_SLOW_PWM_VERSION_MIN_TARGET      F("AVR_Slow_PWM v1.2.2")
+#define AVR_SLOW_PWM_VERSION_MIN             1002002
 
 #include "multiFileProject.h"
 

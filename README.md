@@ -320,7 +320,7 @@ void setup()
 #define USING_MICROS_RESOLUTION       true    //false
 
 // Default is true, uncomment to false
-//#define CHANGING_PWM_END_OF_CYCLE     false 
+//#define CHANGING_PWM_END_OF_CYCLE     false
 
 // To be included only in main(), .ino with setup() to avoid `Multiple Definitions` Linker Error
 #include "AVR_Slow_PWM.h"
@@ -394,9 +394,9 @@ typedef struct
   irqCallback   irqCallbackStartFunc;
   irqCallback   irqCallbackStopFunc;
 
-  double        PWM_Freq;
+  float         PWM_Freq;
 
-  double        PWM_DutyCycle;
+  float         PWM_DutyCycle;
 
   uint32_t      deltaMicrosStart;
   uint32_t      previousMicrosStart;
@@ -424,19 +424,19 @@ volatile unsigned long previousMicrosStop  [] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 
 // You can assign any interval for any timer here, in Microseconds
-double PWM_Period[] =
+uint32_t PWM_Period[] =
 {
-  1000.0,   500.0,   333.333,   250.0,   200.0,   166.667,   142.857,   125.0
+  1000,   500,   333,   250,   200,   167,   143,   125
 };
 
 // You can assign any interval for any timer here, in Hz
-double PWM_Freq[] =
+float PWM_Freq[] =
 {
   1.0f,  2.0f,  3.0f,  4.0f,  5.0f,  6.0f,  7.0f,  8.0f,
 };
 
 // You can assign any interval for any timer here, in Microseconds
-double PWM_DutyCycle[] =
+float PWM_DutyCycle[] =
 {
   5.0, 10.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0
 };
@@ -746,7 +746,7 @@ void setup()
     curISR_PWM_Data[i].previousMicrosStart = startMicros;
     //ISR_PWM.setInterval(curISR_PWM_Data[i].PWM_Period, curISR_PWM_Data[i].irqCallbackStartFunc);
 
-    //void setPWM(uint32_t pin, uint32_t frequency, uint32_t dutycycle
+    //void setPWM(uint32_t pin, float frequency, float dutycycle
     // , timer_callback_p StartCallback = nullptr, timer_callback_p StopCallback = nullptr)
 
     // You can use this with PWM_Freq in Hz
@@ -793,7 +793,7 @@ The following is the sample terminal output when running example [ISR_8_PWMs_Arr
 
 ```
 Starting ISR_8_PWMs_Array_Complex on Arduino AVR ATMega32U4
-AVR_Slow_PWM v1.2.1
+AVR_Slow_PWM v1.2.2
 CPU Frequency = 16 MHz
 [PWM] T3
 [PWM] Freq * 1000 = 10000000.00
@@ -837,8 +837,8 @@ PWM Channel : 7, prog Period (ms): 125.00, actual (uS) : 125192, prog DutyCycle 
 The following is the sample terminal output when running example [**ISR_8_PWMs_Array**](examples/ISR_8_PWMs_Array) on **AVR Mega2560/ADK** to demonstrate how to use multiple PWM channels with simple callback functions.
 
 ```
-Starting ISR_8_PWMs_Array_Complex on Arduino AVR Mega2560/ADK
-AVR_Slow_PWM v1.2.1
+Starting ISR_8_PWMs_Array on Arduino AVR Mega2560/ADK
+AVR_Slow_PWM v1.2.2
 CPU Frequency = 16 MHz
 [PWM] T3
 [PWM] Freq * 1000 = 10000000.00
@@ -846,33 +846,15 @@ CPU Frequency = 16 MHz
 [PWM] OCR = 1599 , preScalerIndex = 1
 [PWM] OK in loop => _OCR = 1599
 [PWM] _preScalerIndex = 1 , preScalerDiv = 1
-Starting  ITimer3 OK, micros() = 2024104
-Channel : 0	Period : 1000000		OnTime : 50000	Start_Time : 2024988
-Channel : 1	Period : 500000		OnTime : 50000	Start_Time : 2024988
-Channel : 2	Period : 333333		OnTime : 66666	Start_Time : 2024988
-Channel : 3	Period : 250000		OnTime : 62500	Start_Time : 2024988
-Channel : 4	Period : 200000		OnTime : 60000	Start_Time : 2024988
-Channel : 5	Period : 166666		OnTime : 58333	Start_Time : 2024988
-Channel : 6	Period : 142857		OnTime : 57142	Start_Time : 2024988
-Channel : 7	Period : 125000		OnTime : 56250	Start_Time : 2024988
-SimpleTimer (us): 2000, us : 12070388, Dus : 10045444
-PWM Channel : 0, prog Period (ms): 1000.00, actual (uS) : 1000000, prog DutyCycle : 5, actual : 4.98
-PWM Channel : 1, prog Period (ms): 500.00, actual (uS) : 499996, prog DutyCycle : 10, actual : 10.00
-PWM Channel : 2, prog Period (ms): 333.33, actual (uS) : 333396, prog DutyCycle : 20, actual : 19.98
-PWM Channel : 3, prog Period (ms): 250.00, actual (uS) : 250196, prog DutyCycle : 25, actual : 24.94
-PWM Channel : 4, prog Period (ms): 200.00, actual (uS) : 200192, prog DutyCycle : 30, actual : 29.88
-PWM Channel : 5, prog Period (ms): 166.67, actual (uS) : 166792, prog DutyCycle : 35, actual : 34.90
-PWM Channel : 6, prog Period (ms): 142.86, actual (uS) : 142988, prog DutyCycle : 40, actual : 39.87
-PWM Channel : 7, prog Period (ms): 125.00, actual (uS) : 125196, prog DutyCycle : 45, actual : 44.89
-SimpleTimer (us): 2000, us : 22144772, Dus : 10074384
-PWM Channel : 0, prog Period (ms): 1000.00, actual (uS) : 1000000, prog DutyCycle : 5, actual : 5.00
-PWM Channel : 1, prog Period (ms): 500.00, actual (uS) : 499996, prog DutyCycle : 10, actual : 10.00
-PWM Channel : 2, prog Period (ms): 333.33, actual (uS) : 333396, prog DutyCycle : 20, actual : 19.98
-PWM Channel : 3, prog Period (ms): 250.00, actual (uS) : 250196, prog DutyCycle : 25, actual : 24.94
-PWM Channel : 4, prog Period (ms): 200.00, actual (uS) : 200196, prog DutyCycle : 30, actual : 29.87
-PWM Channel : 5, prog Period (ms): 166.67, actual (uS) : 166792, prog DutyCycle : 35, actual : 34.90
-PWM Channel : 6, prog Period (ms): 142.86, actual (uS) : 143016, prog DutyCycle : 40, actual : 39.87
-PWM Channel : 7, prog Period (ms): 125.00, actual (uS) : 125008, prog DutyCycle : 45, actual : 44.96
+Starting  ITimer3 OK, micros() = 2023732
+Channel : 0	    Period : 1000000		OnTime : 50000	Start_Time : 2031420
+Channel : 1	    Period : 500000		OnTime : 50000	Start_Time : 2042728
+Channel : 2	    Period : 333333		OnTime : 66666	Start_Time : 2054724
+Channel : 3	    Period : 250000		OnTime : 62500	Start_Time : 2067932
+Channel : 4	    Period : 200000		OnTime : 60000	Start_Time : 2084232
+Channel : 5	    Period : 166666		OnTime : 58333	Start_Time : 2115432
+Channel : 6	    Period : 142857		OnTime : 57142	Start_Time : 3075536
+Channel : 7	    Period : 125000		OnTime : 56250	Start_Time : 4221280
 ```
 
 ---
@@ -883,7 +865,7 @@ The following is the sample terminal output when running example [**ISR_8_PWMs_A
 
 ```
 Starting ISR_8_PWMs_Array_Complex on Arduino AVR UNO, Nano, etc.
-AVR_Slow_PWM v1.2.1
+AVR_Slow_PWM v1.2.2
 CPU Frequency = 16 MHz
 [PWM] T1
 [PWM] Freq * 1000 = 10000000.00
@@ -929,7 +911,7 @@ The following is the sample terminal output when running example [ISR_Modify_PWM
 
 ```
 Starting ISR_Modify_PWM on Arduino AVR Mega2560/ADK
-AVR_Slow_PWM v1.2.1
+AVR_Slow_PWM v1.2.2
 CPU Frequency = 16 MHz
 [PWM] T3
 [PWM] Freq * 1000 = 10000000.00
@@ -937,12 +919,8 @@ CPU Frequency = 16 MHz
 [PWM] OCR = 1599 , preScalerIndex = 1
 [PWM] OK in loop => _OCR = 1599
 [PWM] _preScalerIndex = 1 , preScalerDiv = 1
-Starting  ITimer3 OK, micros() = 2023160
-Using PWM Freq = 1.00, PWM DutyCycle = 10
-Channel : 0	Period : 1000000		OnTime : 100000	Start_Time : 2028040
-Channel : 0	Period : 500000		OnTime : 450000	Start_Time : 12033220
-Channel : 0	Period : 1000000		OnTime : 100000	Start_Time : 22034628
-Channel : 0	Period : 500000		OnTime : 450000	Start_Time : 32036036
+Starting  ITimer3 OK, micros() = 2023764
+Using PWM Freq = 1.00, PWM DutyCycle = 50.00
 ```
 
 ---
@@ -953,7 +931,7 @@ The following is the sample terminal output when running example [ISR_Changing_P
 
 ```
 Starting ISR_Changing_PWM on Arduino AVR Mega2560/ADK
-AVR_Slow_PWM v1.2.1
+AVR_Slow_PWM v1.2.2
 CPU Frequency = 16 MHz
 [PWM] T3
 [PWM] Freq * 1000 = 10000000.00
@@ -961,15 +939,13 @@ CPU Frequency = 16 MHz
 [PWM] OCR = 1599 , preScalerIndex = 1
 [PWM] OK in loop => _OCR = 1599
 [PWM] _preScalerIndex = 1 , preScalerDiv = 1
-Starting  ITimer3 OK, micros() = 2023336
-Using PWM Freq = 1.00, PWM DutyCycle = 50
-Channel : 0	Period : 1000000		OnTime : 500000	Start_Time : 2028216
-Using PWM Freq = 2.00, PWM DutyCycle = 90
-Channel : 0	Period : 500000		OnTime : 450000	Start_Time : 12035408
-Using PWM Freq = 1.00, PWM DutyCycle = 50
-Channel : 0	Period : 1000000		OnTime : 500000	Start_Time : 22040404
-Using PWM Freq = 2.00, PWM DutyCycle = 90
-Channel : 0	Period : 500000		OnTime : 450000	Start_Time : 32045592
+Starting  ITimer3 OK, micros() = 2023844
+Using PWM Freq = 1.00, PWM DutyCycle = 50.00
+Using PWM Freq = 2.00, PWM DutyCycle = 90.00
+Using PWM Freq = 1.00, PWM DutyCycle = 50.00
+Using PWM Freq = 2.00, PWM DutyCycle = 90.00
+Using PWM Freq = 1.00, PWM DutyCycle = 50.00
+Using PWM Freq = 2.00, PWM DutyCycle = 90.00
 ```
 
 ---
@@ -1018,7 +994,7 @@ Submit issues to: [AVR_Slow_PWM issues](https://github.com/khoih-prog/AVR_Slow_P
 3. Add functions to modify PWM settings on-the-fly
 4. Fix `multiple-definitions` linker error. Drop `src_cpp` and `src_h` directories
 5. Add example [multiFileProject](examples/multiFileProject) to demo for multiple-file project
-6. Improve accuracy by using `double`, instead of `uint32_t` for `dutycycle`, `period`
+6. Improve accuracy by using `float`, instead of `uint32_t` for `dutycycle`
 7. Optimize library code by using `reference-passing` instead of `value-passing`
 8. DutyCycle to be optionally updated at the end current PWM period instead of immediately.
 

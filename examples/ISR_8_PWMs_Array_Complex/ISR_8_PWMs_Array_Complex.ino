@@ -114,9 +114,9 @@ typedef struct
   irqCallback   irqCallbackStartFunc;
   irqCallback   irqCallbackStopFunc;
 
-  double        PWM_Freq;
+  float         PWM_Freq;
 
-  double        PWM_DutyCycle;
+  float         PWM_DutyCycle;
 
   uint32_t      deltaMicrosStart;
   uint32_t      previousMicrosStart;
@@ -144,19 +144,19 @@ volatile unsigned long previousMicrosStop  [] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 
 // You can assign any interval for any timer here, in Microseconds
-double PWM_Period[] =
+uint32_t PWM_Period[] =
 {
-  1000.0,   500.0,   333.333,   250.0,   200.0,   166.667,   142.857,   125.0
+  1000,   500,   333,   250,   200,   167,   143,   125
 };
 
 // You can assign any interval for any timer here, in Hz
-double PWM_Freq[] =
+float PWM_Freq[] =
 {
   1.0f,  2.0f,  3.0f,  4.0f,  5.0f,  6.0f,  7.0f,  8.0f,
 };
 
 // You can assign any interval for any timer here, in Microseconds
-double PWM_DutyCycle[] =
+float PWM_DutyCycle[] =
 {
   5.0, 10.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0
 };
@@ -466,7 +466,7 @@ void setup()
     curISR_PWM_Data[i].previousMicrosStart = startMicros;
     //ISR_PWM.setInterval(curISR_PWM_Data[i].PWM_Period, curISR_PWM_Data[i].irqCallbackStartFunc);
 
-    //void setPWM(uint32_t pin, uint32_t frequency, uint32_t dutycycle
+    //void setPWM(uint32_t pin, float frequency, float dutycycle
     // , timer_callback_p StartCallback = nullptr, timer_callback_p StopCallback = nullptr)
 
     // You can use this with PWM_Freq in Hz

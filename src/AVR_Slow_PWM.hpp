@@ -18,7 +18,7 @@
   Therefore, their executions are not blocked by bad-behaving functions / tasks.
   This important feature is absolutely necessary for mission-critical tasks.
 
-  Version: 1.2.1
+  Version: 1.2.2
 
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
@@ -26,6 +26,7 @@
   1.1.0   K Hoang      10/11/2021 Add functions to modify PWM settings on-the-fly
   1.2.0   K Hoang      29/01/2022 Fix multiple-definitions linker error. Improve accuracy
   1.2.1   K Hoang      30/01/2022 DutyCycle to be updated at the end current PWM period
+  1.2.2   K Hoang      01/02/2022 Use float for DutyCycle and Freq, uint32_t for period. Optimize code
 *****************************************************************************************************************************/
 
 #pragma once
@@ -102,13 +103,13 @@
 #endif
 
 #ifndef AVR_SLOW_PWM_VERSION
-  #define AVR_SLOW_PWM_VERSION           F("AVR_Slow_PWM v1.2.1")
+  #define AVR_SLOW_PWM_VERSION           F("AVR_Slow_PWM v1.2.2")
   
   #define AVR_SLOW_PWM_VERSION_MAJOR     1
   #define AVR_SLOW_PWM_VERSION_MINOR     2
-  #define AVR_SLOW_PWM_VERSION_PATCH     1
+  #define AVR_SLOW_PWM_VERSION_PATCH     2
 
-  #define AVR_SLOW_PWM_VERSION_INT      1002001
+  #define AVR_SLOW_PWM_VERSION_INT      1002002
 #endif
 
 #ifndef _PWM_LOGLEVEL_
@@ -189,7 +190,7 @@ class TimerInterrupt
     uint32_t        _OCRValue;
     uint32_t        _OCRValueRemaining;
     volatile long   _toggle_count;
-    double           _frequency;
+    float           _frequency;
 
     void*           _callback;        // pointer to the callback function
     void*           _params;          // function parameter

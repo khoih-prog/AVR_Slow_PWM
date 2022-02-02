@@ -18,7 +18,7 @@
   Therefore, their executions are not blocked by bad-behaving functions / tasks.
   This important feature is absolutely necessary for mission-critical tasks.
 
-  Version: 1.2.1
+  Version: 1.2.2
 
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
@@ -26,6 +26,7 @@
   1.1.0   K Hoang      10/11/2021 Add functions to modify PWM settings on-the-fly
   1.2.0   K Hoang      29/01/2022 Fix multiple-definitions linker error. Improve accuracy
   1.2.1   K Hoang      30/01/2022 DutyCycle to be updated at the end current PWM period
+  1.2.2   K Hoang      01/02/2022 Use float for DutyCycle and Freq, uint32_t for period. Optimize code
 *****************************************************************************************************************************/
 
 #pragma once
@@ -126,7 +127,7 @@ void AVR_Slow_PWM_ISR::run()
           PWM[channelNum].period    = PWM[channelNum].newPeriod;
           PWM[channelNum].newPeriod = 0;
           
-          PWM[channelNum].onTime  = ( PWM[channelNum].period * PWM[channelNum].newDutyCycle ) / 100;
+          PWM[channelNum].onTime  = PWM[channelNum].newOnTime;
         }
 #endif
       }     
@@ -162,12 +163,12 @@ int8_t AVR_Slow_PWM_ISR::findFirstFreeSlot()
 
 ///////////////////////////////////////////////////
 
-int8_t AVR_Slow_PWM_ISR::setupPWMChannel(const uint32_t& pin, const double& period, const double& dutycycle, void* cbStartFunc, void* cbStopFunc)
+int8_t AVR_Slow_PWM_ISR::setupPWMChannel(const uint32_t& pin, const uint32_t& period, const float& dutycycle, void* cbStartFunc, void* cbStopFunc)
 {
   int channelNum;
   
   // Invalid input, such as period = 0, etc
-  if ( (period <= 0.0) || (dutycycle < 0.0) || (dutycycle > 100.0) )
+  if ( (period == 0) || (dutycycle < 0.0) || (dutycycle > 100.0) )
   {
     PWM_LOGERROR(F("Error: Invalid period or dutycycle"));
     return -1;
@@ -202,10 +203,10 @@ int8_t AVR_Slow_PWM_ISR::setupPWMChannel(const uint32_t& pin, const double& peri
   PWM[channelNum].callbackStart = cbStartFunc;
   PWM[channelNum].callbackStop  = cbStopFunc;
   
-  PWM_LOGDEBUG0("Channel : ");      PWM_LOGDEBUG0(channelNum); 
-  PWM_LOGDEBUG0("\t    Period : "); PWM_LOGDEBUG0(PWM[channelNum].period);
-  PWM_LOGDEBUG0("\t\tOnTime : ");   PWM_LOGDEBUG0(PWM[channelNum].onTime); 
-  PWM_LOGDEBUG0("\tStart_Time : "); PWM_LOGDEBUGLN0(PWM[channelNum].prevTime);
+  PWM_LOGINFO0("Channel : ");      PWM_LOGINFO0(channelNum); 
+  PWM_LOGINFO0("\t    Period : "); PWM_LOGINFO0(PWM[channelNum].period);
+  PWM_LOGINFO0("\t\tOnTime : ");   PWM_LOGINFO0(PWM[channelNum].onTime); 
+  PWM_LOGINFO0("\tStart_Time : "); PWM_LOGINFOLN0(PWM[channelNum].prevTime);
  
   numChannels++;
   
@@ -216,10 +217,10 @@ int8_t AVR_Slow_PWM_ISR::setupPWMChannel(const uint32_t& pin, const double& peri
 
 ///////////////////////////////////////////////////
 
-bool AVR_Slow_PWM_ISR::modifyPWMChannel_Period(const uint8_t& channelNum, const uint32_t& pin, const double& period, const double& dutycycle)
+bool AVR_Slow_PWM_ISR::modifyPWMChannel_Period(const uint8_t& channelNum, const uint32_t& pin, const uint32_t& period, const float& dutycycle)
 {
   // Invalid input, such as period = 0, etc
-  if ( (period <= 0.0) || (dutycycle < 0.0) || (dutycycle > 100.0) )
+  if ( (period == 0) || (dutycycle < 0.0) || (dutycycle > 100.0) )
   {
     PWM_LOGERROR("Error: Invalid period or dutycycle");
     return false;
@@ -241,11 +242,12 @@ bool AVR_Slow_PWM_ISR::modifyPWMChannel_Period(const uint8_t& channelNum, const 
 
   PWM[channelNum].newPeriod     = period;
   PWM[channelNum].newDutyCycle  = dutycycle;
+  PWM[channelNum].newOnTime     = ( period * dutycycle ) / 100;
   
-  PWM_LOGDEBUG0("Channel : ");      PWM_LOGDEBUG0(channelNum); 
-  PWM_LOGDEBUG0("\tNew Period : "); PWM_LOGDEBUG0(PWM[channelNum].newPeriod);
-  PWM_LOGDEBUG0("\t\tOnTime : ");   PWM_LOGDEBUG0(( period * dutycycle ) / 100); 
-  PWM_LOGDEBUG0("\tStart_Time : "); PWM_LOGDEBUGLN0(PWM[channelNum].prevTime);
+  PWM_LOGINFO0("Channel : ");      PWM_LOGINFO0(channelNum); 
+  PWM_LOGINFO0("\tNew Period : "); PWM_LOGINFO0(PWM[channelNum].newPeriod);
+  PWM_LOGINFO0("\t\tOnTime : ");   PWM_LOGINFO0(PWM[channelNum].newOnTime); 
+  PWM_LOGINFO0("\tStart_Time : "); PWM_LOGINFOLN0(PWM[channelNum].prevTime);
   
 #else
 
@@ -258,10 +260,10 @@ bool AVR_Slow_PWM_ISR::modifyPWMChannel_Period(const uint8_t& channelNum, const 
   
   PWM[channelNum].prevTime      = timeNow();
    
-  PWM_LOGDEBUG0("Channel : ");      PWM_LOGDEBUG0(channelNum); 
-  PWM_LOGDEBUG0("\t    Period : "); PWM_LOGDEBUG0(PWM[channelNum].period);
-  PWM_LOGDEBUG0("\t\tOnTime : ");   PWM_LOGDEBUG0(PWM[channelNum].onTime); 
-  PWM_LOGDEBUG0("\tStart_Time : "); PWM_LOGDEBUGLN0(PWM[channelNum].prevTime);
+  PWM_LOGINFO0("Channel : ");      PWM_LOGINFO0(channelNum); 
+  PWM_LOGINFO0("\t    Period : "); PWM_LOGINFO0(PWM[channelNum].period);
+  PWM_LOGINFO0("\t\tOnTime : ");   PWM_LOGINFO0(PWM[channelNum].onTime); 
+  PWM_LOGINFO0("\tStart_Time : "); PWM_LOGINFOLN0(PWM[channelNum].prevTime);
   
 #endif
   

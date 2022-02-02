@@ -101,13 +101,13 @@ uint32_t PWM_Pin[] =
 #define NUMBER_ISR_PWMS         ( sizeof(PWM_Pin) / sizeof(uint32_t) )
 
 // You can assign any interval for any timer here, in Hz
-double PWM_Freq[] =
+float PWM_Freq[] =
 {
   1.0f,  2.0f,  3.0f,  4.0f,  5.0f,  6.0f,  7.0f,  8.0f,
 };
 
 // You can assign any interval for any timer here, in Microseconds
-double PWM_DutyCycle[] =
+float PWM_DutyCycle[] =
 {
   5.0, 10.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0
 };

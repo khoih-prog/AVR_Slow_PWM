@@ -26,16 +26,22 @@
         defined(ARDUINO_AVR_METRO) || defined(ARDUINO_AVR_PROTRINKET5) || defined(ARDUINO_AVR_PROTRINKET3) || defined(ARDUINO_AVR_PROTRINKET5FTDI) || \
         defined(ARDUINO_AVR_PROTRINKET3FTDI) )
   #define USE_TIMER_1     true
-  #warning Using Timer1
 #else          
   #define USE_TIMER_3     true
-  #warning Using Timer3
 #endif
 
-// These define's must be placed at the beginning before #include "ESP32_PWM.h"
+// These define's must be placed at the beginning before #include "AVR_Slow_PWM.h"
 // _PWM_LOGLEVEL_ from 0 to 4
 // Don't define _PWM_LOGLEVEL_ > 0. Only for special ISR debugging only. Can hang the system.
 #define _PWM_LOGLEVEL_      3
+
+#if (_PWM_LOGLEVEL_ > 3)
+  #if USE_TIMER_1
+    #warning Using Timer1
+  #elif USE_TIMER_1
+    #warning Using Timer3
+  #endif
+#endif
 
 #define USING_MICROS_RESOLUTION       true    //false
 

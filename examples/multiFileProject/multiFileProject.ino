@@ -17,14 +17,12 @@
         defined(ARDUINO_AVR_METRO) || defined(ARDUINO_AVR_PROTRINKET5) || defined(ARDUINO_AVR_PROTRINKET3) || defined(ARDUINO_AVR_PROTRINKET5FTDI) || \
         defined(ARDUINO_AVR_PROTRINKET3FTDI) )
   #define USE_TIMER_1     true
-  #warning Using Timer1
 #else          
   #define USE_TIMER_3     true
-  #warning Using Timer3
 #endif
 
-#define AVR_SLOW_PWM_VERSION_MIN_TARGET      F("AVR_Slow_PWM v1.2.2")
-#define AVR_SLOW_PWM_VERSION_MIN             1002002
+#define AVR_SLOW_PWM_VERSION_MIN_TARGET      F("AVR_Slow_PWM v1.2.3")
+#define AVR_SLOW_PWM_VERSION_MIN             1002003
 
 #include "multiFileProject.h"
 

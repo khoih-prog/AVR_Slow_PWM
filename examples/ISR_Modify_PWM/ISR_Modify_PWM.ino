@@ -26,17 +26,23 @@
         defined(ARDUINO_AVR_METRO) || defined(ARDUINO_AVR_PROTRINKET5) || defined(ARDUINO_AVR_PROTRINKET3) || defined(ARDUINO_AVR_PROTRINKET5FTDI) || \
         defined(ARDUINO_AVR_PROTRINKET3FTDI) )
   #define USE_TIMER_1     true
-  #warning Using Timer1
 #else          
   #define USE_TIMER_3     true
-  #warning Using Timer3
 #endif
 
-// These define's must be placed at the beginning before #include "ESP32_PWM.h"
+// These define's must be placed at the beginning before #include "AVR_Slow_PWM.h"
 // _PWM_LOGLEVEL_ from 0 to 4
 // Don't define _PWM_LOGLEVEL_ > 0. Only for special ISR debugging only. Can hang the system.
 #define _PWM_LOGLEVEL_      3
 
+#if (_PWM_LOGLEVEL_ > 3)
+  #if USE_TIMER_1
+    #warning Using Timer1
+  #elif USE_TIMER_1
+    #warning Using Timer3
+  #endif
+#endif
+  
 #define USING_MICROS_RESOLUTION       true    //false
 
 // Default is true, uncomment to false
@@ -86,9 +92,9 @@ void TimerHandler()
 uint32_t PWM_Pin    = LED_BUILTIN;
 
 // You can assign any interval for any timer here, in Hz
-float PWM_Freq1   = 1.0f;
+float PWM_Freq1   = 200.0f;   //1.0f;
 // You can assign any interval for any timer here, in Hz
-float PWM_Freq2   = 2.0f;
+float PWM_Freq2   = 100.0f;   //2.0f;
 
 // You can assign any interval for any timer here, in microseconds
 uint32_t PWM_Period1 = 1000000 / PWM_Freq1;
@@ -96,9 +102,9 @@ uint32_t PWM_Period1 = 1000000 / PWM_Freq1;
 uint32_t PWM_Period2 = 1000000 / PWM_Freq2;
 
 // You can assign any duty_cycle for any PWM here, from 0-100
-float PWM_DutyCycle1  = 50.0;
+float PWM_DutyCycle1  = 1.0f;     //50.0f;
 // You can assign any duty_cycle for any PWM here, from 0-100
-float PWM_DutyCycle2  = 90.0;
+float PWM_DutyCycle2  = 5.55f;    //90.0f;
 
 // Channel number used to identify associated channel
 int channelNum;
@@ -207,8 +213,8 @@ void changePWM()
 {
   static uint8_t count = 1;
 
-  double PWM_Freq;
-  uint32_t PWM_DutyCycle;
+  float PWM_Freq;
+  float PWM_DutyCycle;
 
   if (count++ % 2)
   {

@@ -18,7 +18,7 @@
   Therefore, their executions are not blocked by bad-behaving functions / tasks.
   This important feature is absolutely necessary for mission-critical tasks.
 
-  Version: 1.2.2
+  Version: 1.2.3
 
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
@@ -27,6 +27,7 @@
   1.2.0   K Hoang      29/01/2022 Fix multiple-definitions linker error. Improve accuracy
   1.2.1   K Hoang      30/01/2022 DutyCycle to be updated at the end current PWM period
   1.2.2   K Hoang      01/02/2022 Use float for DutyCycle and Freq, uint32_t for period. Optimize code
+  1.2.3   K Hoang      04/03/2022 Fix `DutyCycle` and `New Period` display bugs. Display warning only when debug level > 3
 *****************************************************************************************************************************/
 
 #pragma once
@@ -245,7 +246,7 @@ bool AVR_Slow_PWM_ISR::modifyPWMChannel_Period(const uint8_t& channelNum, const 
   PWM[channelNum].newOnTime     = ( period * dutycycle ) / 100;
   
   PWM_LOGINFO0("Channel : ");      PWM_LOGINFO0(channelNum); 
-  PWM_LOGINFO0("\tNew Period : "); PWM_LOGINFO0(PWM[channelNum].newPeriod);
+  PWM_LOGINFO0("\t    Period : "); PWM_LOGINFO0(period);
   PWM_LOGINFO0("\t\tOnTime : ");   PWM_LOGINFO0(PWM[channelNum].newOnTime); 
   PWM_LOGINFO0("\tStart_Time : "); PWM_LOGINFOLN0(PWM[channelNum].prevTime);
   

@@ -5,7 +5,7 @@
 
   Built by Khoi Hoang https://github.com/khoih-prog/AVR_Slow_PWM
   Licensed under MIT license
-  
+
   TCNTx - Timer/Counter Register. The actual timer value is stored here.
   OCRx - Output Compare Register
   ICRx - Input Capture Register (only for 16bit timer)

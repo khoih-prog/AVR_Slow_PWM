@@ -5,7 +5,7 @@
 
   Built by Khoi Hoang https://github.com/khoih-prog/AVR_Slow_PWM
   Licensed under MIT license
-  
+
   TCNTx - Timer/Counter Register. The actual timer value is stored here.
   OCRx - Output Compare Register
   ICRx - Input Capture Register (only for 16bit timer)
@@ -25,9 +25,9 @@
         defined(ARDUINO_AVR_NG) || defined(ARDUINO_AVR_UNO_WIFI_DEV_ED) || defined(ARDUINO_AVR_DUEMILANOVE) || defined(ARDUINO_AVR_FEATHER328P) || \
         defined(ARDUINO_AVR_METRO) || defined(ARDUINO_AVR_PROTRINKET5) || defined(ARDUINO_AVR_PROTRINKET3) || defined(ARDUINO_AVR_PROTRINKET5FTDI) || \
         defined(ARDUINO_AVR_PROTRINKET3FTDI) )
-  #define USE_TIMER_1     true
-#else          
-  #define USE_TIMER_3     true
+#define USE_TIMER_1     true
+#else
+#define USE_TIMER_3     true
 #endif
 
 // These define's must be placed at the beginning before #include "AVR_Slow_PWM.h"
@@ -82,7 +82,7 @@ AVR_Slow_PWM ISR_PWM;
 //////////////////////////////////////////////////////
 
 void TimerHandler()
-{ 
+{
   ISR_PWM.run();
 }
 
@@ -159,22 +159,26 @@ void doingSomething7()
 
 irqCallback irqCallbackStartFunc[] =
 {
-  doingSomething0,  doingSomething1,  doingSomething2,  doingSomething3, 
+  doingSomething0,  doingSomething1,  doingSomething2,  doingSomething3,
   doingSomething4,  doingSomething5,  doingSomething6,  doingSomething7
 };
 
 ////////////////////////////////////////////////
 
 void setup()
-{ 
+{
   Serial.begin(115200);
+
   while (!Serial);
 
   delay(2000);
 
-  Serial.print(F("\nStarting ISR_8_PWMs_Array on ")); Serial.println(BOARD_NAME);
+  Serial.print(F("\nStarting ISR_8_PWMs_Array on "));
+  Serial.println(BOARD_NAME);
   Serial.println(AVR_SLOW_PWM_VERSION);
-  Serial.print(F("CPU Frequency = ")); Serial.print(F_CPU / 1000000); Serial.println(F(" MHz"));
+  Serial.print(F("CPU Frequency = "));
+  Serial.print(F_CPU / 1000000);
+  Serial.println(F(" MHz"));
 
   // Timer0 is used for micros(), millis(), delay(), etc and can't be used
   // Select Timer 1-2 for UNO, 1-5 for MEGA, 1,3,4 for 16u4/32u4
@@ -191,18 +195,20 @@ void setup()
 
   if (ITimer1.attachInterruptInterval(HW_TIMER_INTERVAL_MS, TimerHandler))
   {
-    Serial.print(F("Starting  ITimer1 OK, micros() = ")); Serial.println(micros());
+    Serial.print(F("Starting  ITimer1 OK, micros() = "));
+    Serial.println(micros());
   }
   else
     Serial.println(F("Can't set ITimer1. Select another freq. or timer"));
-    
+
 #elif USE_TIMER_3
 
   ITimer3.init();
 
   if (ITimer3.attachInterruptInterval(HW_TIMER_INTERVAL_MS, TimerHandler))
   {
-    Serial.print(F("Starting  ITimer3 OK, micros() = ")); Serial.println(micros());
+    Serial.print(F("Starting  ITimer3 OK, micros() = "));
+    Serial.println(micros());
   }
   else
     Serial.println(F("Can't set ITimer3. Select another freq. or timer"));
@@ -219,18 +225,20 @@ void setup()
 
   if (ITimer1.attachInterrupt(HW_TIMER_INTERVAL_FREQ, TimerHandler))
   {
-    Serial.print(F("Starting  ITimer1 OK, micros() = ")); Serial.println(micros());
+    Serial.print(F("Starting  ITimer1 OK, micros() = "));
+    Serial.println(micros());
   }
   else
     Serial.println(F("Can't set ITimer1. Select another freq. or timer"));
-    
+
 #elif USE_TIMER_3
 
   ITimer3.init();
 
   if (ITimer3.attachInterrupt(HW_TIMER_INTERVAL_FREQ, TimerHandler))
   {
-    Serial.print(F("Starting  ITimer3 OK, micros() = ")); Serial.println(micros());
+    Serial.print(F("Starting  ITimer3 OK, micros() = "));
+    Serial.println(micros());
   }
   else
     Serial.println(F("Can't set ITimer3. Select another freq. or timer"));
@@ -238,7 +246,7 @@ void setup()
 #endif
 
 #endif
-  
+
 
   // Just to demonstrate, don't use too many ISR Timers if not absolutely necessary
   // You can use up to 16 timer for each ISR_PWM

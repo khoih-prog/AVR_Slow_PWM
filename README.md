@@ -6,8 +6,11 @@
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](#Contributing)
 [![GitHub issues](https://img.shields.io/github/issues/khoih-prog/AVR_Slow_PWM.svg)](http://github.com/khoih-prog/AVR_Slow_PWM/issues)
 
+
 <a href="https://www.buymeacoffee.com/khoihprog6" title="Donate to my libraries using BuyMeACoffee"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Donate to my libraries using BuyMeACoffee" style="height: 50px !important;width: 181px !important;" ></a>
 <a href="https://www.buymeacoffee.com/khoihprog6" title="Donate to my libraries using BuyMeACoffee"><img src="https://img.shields.io/badge/buy%20me%20a%20coffee-donate-orange.svg?logo=buy-me-a-coffee&logoColor=FFDD00" style="height: 20px !important;width: 200px !important;" ></a>
+<a href="https://profile-counter.glitch.me/khoih-prog/count.svg" title="Total khoih-prog Visitor count"><img src="https://profile-counter.glitch.me/khoih-prog/count.svg" style="height: 30px;width: 200px;"></a>
+<a href="https://profile-counter.glitch.me/khoih-prog-AVR_Slow_PWM/count.svg" title="AVR_Slow_PWM Visitor count"><img src="https://profile-counter.glitch.me/khoih-prog-AVR_Slow_PWM/count.svg" style="height: 30px;width: 200px;"></a>
 
 ---
 ---
@@ -135,8 +138,8 @@ The catch is **your function is now part of an ISR (Interrupt Service Routine), 
 ## Prerequisites
 
  1. [`Arduino IDE 1.8.19+` for Arduino](https://github.com/arduino/Arduino). [![GitHub release](https://img.shields.io/github/release/arduino/Arduino.svg)](https://github.com/arduino/Arduino/releases/latest)
- 2. [`Arduino AVR core 1.8.5+`](https://github.com/arduino/ArduinoCore-avr) for Arduino AVR boards. Use Arduino Board Manager to install. [![Latest release](https://img.shields.io/github/release/arduino/ArduinoCore-avr.svg)](https://github.com/arduino/ArduinoCore-avr/releases/latest/)
- 3. [`Adafruit AVR core 1.4.14+`](https://github.com/adafruit/Adafruit_Arduino_Boards) for Adafruit AVR boards. Use Arduino Board Manager to install. 
+ 2. [`Arduino AVR core 1.8.6+`](https://github.com/arduino/ArduinoCore-avr) for Arduino AVR boards. Use Arduino Board Manager to install. [![Latest release](https://img.shields.io/github/release/arduino/ArduinoCore-avr.svg)](https://github.com/arduino/ArduinoCore-avr/releases/latest/)
+ 3. [`Adafruit AVR core 1.4.15+`](https://github.com/adafruit/Adafruit_Arduino_Boards) for Adafruit AVR boards. Use Arduino Board Manager to install. [![Latest release](https://img.shields.io/github/release/adafruit/Adafruit_Arduino_Boards.svg)](https://github.com/adafruit/Adafruit_Arduino_Boards/releases/latest/)
  4. [`Sparkfun AVR core 1.1.13+`](https://github.com/sparkfun/Arduino_Boards) for Sparkfun AVR boards. Use Arduino Board Manager to install. 
  
  5. To use with certain example
@@ -158,9 +161,9 @@ You can also use this link [![arduino-library-badge](https://www.ardu-badge.com/
 Another way to install is to:
 
 1. Navigate to [**AVR_Slow_PWM**](https://github.com/khoih-prog/AVR_Slow_PWM) page.
-2. Download the latest release `AVR_Slow_PWM-master.zip`.
-3. Extract the zip file to `AVR_Slow_PWM-master` directory 
-4. Copy whole `AVR_Slow_PWM-master` folder to Arduino libraries' directory such as `~/Arduino/libraries/`.
+2. Download the latest release `AVR_Slow_PWM-main.zip`.
+3. Extract the zip file to `AVR_Slow_PWM-main` directory 
+4. Copy whole `AVR_Slow_PWM-main` folder to Arduino libraries' directory such as `~/Arduino/libraries/`.
 
 ### VS Code & PlatformIO
 
@@ -179,14 +182,14 @@ The current library implementation, using `xyz-Impl.h` instead of standard `xyz.
 
 You can include this `.hpp` file
 
-```
+```cpp
 // Can be included as many times as necessary, without `Multiple Definitions` Linker Error
 #include "AVR_Slow_PWM.hpp"     //https://github.com/khoih-prog/AVR_Slow_PWM
 ```
 
 in many files. But be sure to use the following `.h` file **in just 1 `.h`, `.cpp` or `.ino` file**, which must **not be included in any other file**, to avoid `Multiple Definitions` Linker Error
 
-```
+```cpp
 // To be included only in main(), .ino with setup() to avoid `Multiple Definitions` Linker Error
 #include "AVR_Slow_PWM.h"           //https://github.com/khoih-prog/AVR_Slow_PWM
 ```
@@ -247,7 +250,7 @@ Before using any Timer, you have to make sure the Timer has not been used by any
 
 #### 1. Init Hardware Timer
 
-```
+```cpp
 // Select the timers you're using, here ITimer1
 #define USE_TIMER_1     true
 #define USE_TIMER_2     false
@@ -261,7 +264,7 @@ AVR_Slow_PWM ISR_PWM;
 
 #### 2. Set PWM Frequency, dutycycle, attach irqCallbackStartFunc and irqCallbackStopFunc functions
 
-```
+```cpp
 void irqCallbackStartFunc()
 {
 
@@ -313,7 +316,7 @@ https://github.com/khoih-prog/AVR_Slow_PWM/blob/e52cd46014064efa2b30c895ce14c7cd
 The following is the sample terminal output when running example [ISR_8_PWMs_Array_Complex](examples/ISR_8_PWMs_Array_Complex) to demonstrate how to use multiple PWM channels with complex callback functions, the accuracy of ISR Hardware PWM-channels, **especially when system is very busy**.  The ISR PWM-channels is **running exactly according to corresponding programmed periods and duty-cycles**
 
 
-```
+```cpp
 Starting ISR_8_PWMs_Array_Complex on Arduino AVR ATMega32U4
 AVR_Slow_PWM v1.2.3
 CPU Frequency = 16 MHz
@@ -358,7 +361,7 @@ PWM Channel : 7, prog Period (ms): 125.00, actual (uS) : 125192, prog DutyCycle 
 
 The following is the sample terminal output when running example [**ISR_8_PWMs_Array**](examples/ISR_8_PWMs_Array) on **AVR Mega2560/ADK** to demonstrate how to use multiple PWM channels with simple callback functions.
 
-```
+```cpp
 Starting ISR_8_PWMs_Array on Arduino AVR Mega2560/ADK
 AVR_Slow_PWM v1.2.3
 CPU Frequency = 16 MHz
@@ -385,7 +388,7 @@ Channel : 7	    Period : 125000		OnTime : 56250	Start_Time : 4221280
 
 The following is the sample terminal output when running example [**ISR_8_PWMs_Array_Simple**](examples/ISR_8_PWMs_Array_Simple) on **Arduino AVR UNO** to demonstrate how to use multiple PWM channels.
 
-```
+```cpp
 Starting ISR_8_PWMs_Array_Complex on Arduino AVR UNO, Nano, etc.
 AVR_Slow_PWM v1.2.3
 CPU Frequency = 16 MHz
@@ -431,7 +434,7 @@ PWM Channel : 7, prog Period (ms): 125.00, actual (uS) : 125012, prog DutyCycle 
 
 The following is the sample terminal output when running example [ISR_Modify_PWM](examples/ISR_Modify_PWM) on **AVR Mega2560/ADK** to demonstrate how to modify PWM settings on-the-fly without deleting the PWM channel
 
-```
+```cpp
 Starting ISR_Modify_PWM on Arduino AVR Mega2560/ADK
 AVR_Slow_PWM v1.2.3
 CPU Frequency = 16 MHz
@@ -467,7 +470,7 @@ Channel : 0	    Period : 10000		OnTime : 555	Start_Time : 152062572
 
 The following is the sample terminal output when running example [ISR_Changing_PWM](examples/ISR_Changing_PWM) on **AVR Mega2560/ADK** to demonstrate how to modify PWM settings on-the-fly by deleting the PWM channel and reinit the PWM channel
 
-```
+```cpp
 Starting ISR_Changing_PWM on Arduino AVR Mega2560/ADK
 AVR_Slow_PWM v1.2.3
 CPU Frequency = 16 MHz
@@ -565,6 +568,6 @@ If you want to contribute to this project:
 
 ## Copyright
 
-Copyright 2021- Khoi Hoang
+Copyright (c) 2021- Khoi Hoang
 
 
